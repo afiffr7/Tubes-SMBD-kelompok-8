@@ -1,4 +1,3 @@
-<?php include 'koneksi.php'; ?>
 <!DOCTYPE html>
 <html lang="id">
 
@@ -8,7 +7,6 @@
     <title>Sistem Pemesanan Makanan</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         /* ─── RESET & TOKENS ─────────────────────────────────── */
@@ -168,20 +166,19 @@
 
         .form-input {
             width: 100%;
-            padding: 0.9rem 0.9rem 0.9rem 3rem;
-            border: 3px solid #b0a898;
-            border-radius: 0.5rem;
+            padding: 0.8rem 0.9rem 0.8rem 2.6rem;
+            border: none;
+            border-radius: 2rem;
             font-size: 0.9rem;
             font-family: 'Inter', sans-serif;
-            background: #f0ebe0;
+            background: #d9d4ca;
             color: #2d2217;
             outline: none;
-            transition: all .2s;
+            transition: box-shadow .2s;
         }
 
         .form-input:focus {
-            border-color: var(--brown);
-            background: #fff;
+            box-shadow: 0 0 0 2px var(--brown-mid);
         }
 
         .form-input::placeholder {
@@ -190,29 +187,24 @@
 
         .auth-btn {
             display: block;
-            margin: 2rem auto 0;
-            padding: 1rem 3rem;
-            background: var(--brown);
-            color: #fff;
-            border: 4px solid #4a3f35;
-            border-radius: 0;
+            margin: 1.2rem auto 0;
+            padding: 0.65rem 2.5rem;
+            background: #d9d4ca;
+            color: var(--brown);
+            border: 2px solid #b0a898;
+            border-radius: 0.5rem;
             font-weight: 700;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all .2s;
             font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
-            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
+            font-size: 0.6rem;
         }
 
         .auth-btn:hover {
-            background: var(--brown-mid);
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .auth-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 0px 0px 0 rgba(0, 0, 0, 0.1);
+            background: var(--brown);
+            color: #fff;
+            border-color: var(--brown);
         }
 
         .form-error {
@@ -300,15 +292,12 @@
             font-weight: 700;
         }
 
-        .nav-icon-fa {
-            width: 20px;
-            font-size: 0.9rem;
-            color: var(--brown-mid);
-            margin-right: 0.5rem;
-        }
-
-        .nav-item.active .nav-icon-fa {
-            color: var(--brown);
+        .nav-icon {
+            width: 16px;
+            height: 16px;
+            background: #b0a898;
+            border-radius: 3px;
+            flex-shrink: 0;
         }
 
         .nav-badge {
@@ -339,9 +328,15 @@
             background: #ddd8cc;
         }
 
-        .logout-icon-fa {
-            font-size: 0.9rem;
-            color: #7a2e2e;
+        .logout-icon {
+            width: 18px;
+            height: 18px;
+            background: #b0a898;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
         }
 
         /* ─── BILLBOARD ──────────────────────────────────────── */
@@ -365,11 +360,9 @@
 
         .billboard-text {
             font-family: 'Press Start 2P', monospace;
-            font-size: 1.2rem;
+            font-size: 1.55rem;
             color: #fff;
-            letter-spacing: 2px;
-            display: inline-block;
-            padding-right: 50px;
+            letter-spacing: 3px;
         }
 
         @keyframes marquee {
@@ -413,101 +406,35 @@
             }
         }
 
-        /* ─── DASHBOARD PROMO SLIDER ─────────────────────────── */
-        .promo-container {
+        /* ─── DASHBOARD ──────────────────────────────────────── */
+        .promo-banner {
             background: var(--beige-dark);
-            border: 3px solid var(--brown);
-            border-radius: 0.85rem;
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .promo-header {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 2rem;
+            border: 2px solid var(--brown);
             color: var(--brown);
-            transform: rotate(-5deg);
-            flex-shrink: 0;
-            border-right: 3px dashed var(--brown-mid);
-            padding-right: 2rem;
-        }
-
-        .promo-slider-wrapper {
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .promo-slider {
-            display: flex;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .promo-item {
-            min-width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            padding: 0.5rem;
-            cursor: pointer;
-        }
-
-        .promo-item-img {
-            width: 100px;
-            height: 90px;
-            background: var(--brown);
-            border-radius: 0.75rem;
+            padding: 2.5rem 1.25rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3rem;
-            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .promo-item-info {
-            flex: 1;
-        }
-
-        .promo-item-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.8rem;
-            color: var(--brown);
-            margin-bottom: 0.5rem;
-        }
-
-        .promo-item-price {
-            display: flex;
-            align-items: center;
             gap: 1rem;
         }
 
-        .price-old {
-            font-size: 0.8rem;
-            color: #888;
-            text-decoration: line-through;
+        .promo-banner h3 {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 2rem;
+            margin: 0;
+            font-weight: normal;
         }
 
-        .price-new {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
-            color: #c0392b;
-        }
-
-        .promo-badge {
-            display: inline-block;
-            background: #c0392b;
-            color: #fff;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.5rem;
-            padding: 0.4rem 0.8rem;
-            border-radius: 0.3rem;
-            margin-bottom: 0.5rem;
+        .promo-banner .promo-pill {
+            background: var(--beige);
+            border: 1px solid var(--brown);
+            border-radius: 2rem;
+            padding: 0.5rem 2rem;
+            height: 40px;
+            width: 200px;
         }
 
         .store-list {
@@ -585,42 +512,30 @@
         .toko-card {
             background: var(--card-dark);
             border-radius: 0.85rem;
-            min-height: 140px;
+            height: 115px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            transition: all .2s;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            align-items: flex-start;
+            justify-content: flex-end;
+            padding: 0.75rem 1rem;
+            transition: background .18s;
         }
 
         .toko-card:hover {
             background: var(--card-hover);
-            transform: translateY(-4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .toko-card-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
         }
 
         .toko-card-name {
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.88rem;
             color: #fff;
-            font-family: 'Press Start 2P', monospace;
-            line-height: 1.4;
-            margin-bottom: 0.4rem;
         }
 
         .toko-card-desc {
             font-size: 0.7rem;
             color: #d8cfc6;
-            line-height: 1.3;
+            margin-top: 2px;
         }
 
         /* ─── MITRA PAGE ─────────────────────────────────────── */
@@ -633,29 +548,24 @@
         .mitra-card {
             background: var(--card-dark);
             border-radius: 0.85rem;
-            min-height: 180px;
+            min-height: 200px;
             cursor: pointer;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-            transition: all .2s;
-            text-align: center;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            align-items: flex-start;
+            justify-content: flex-start;
+            padding: 1rem 1.1rem;
+            transition: background .18s;
         }
 
         .mitra-card:hover {
             background: var(--card-hover);
-            transform: scale(1.02);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
         }
 
         .mitra-name {
             font-family: 'Press Start 2P', monospace;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: #fff;
-            line-height: 1.6;
-            letter-spacing: 1px;
+            line-height: 1.7;
         }
 
         /* ─── TOKO MITRA ─────────────────────────────────────── */
@@ -713,47 +623,39 @@
         }
 
         .food-card {
-            background: #fff;
-            border: 2px solid var(--brown);
+            background: white;
             border-radius: 0.85rem;
-            padding: 1.25rem;
-            box-shadow: 4px 4px 0 rgba(92, 78, 64, .15);
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(92, 78, 64, .10);
         }
 
         .food-name {
-            font-family: 'Inter', sans-serif;
             font-weight: 700;
-            font-size: 1rem;
-            color: var(--brown);
-            margin-bottom: 0.2rem;
+            font-size: 0.95rem;
+            margin-bottom: 0.3rem;
         }
 
         .food-price {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.65rem;
+            font-size: 0.85rem;
             color: var(--brown-mid);
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
 
         .add-btn {
             width: 100%;
-            padding: 0.75rem;
+            padding: 0.55rem;
             background: var(--brown);
             color: #fff;
             border: none;
-            border-radius: 0.5rem;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.55rem;
+            border-radius: 0.6rem;
+            font-weight: 600;
+            font-size: 0.82rem;
             cursor: pointer;
-            transition: all .2s;
+            transition: background .18s;
         }
 
         .add-btn:hover {
             background: var(--brown-mid);
-            transform: translateY(-2px);
         }
 
         /* ─── CART PAGE ──────────────────────────────────────── */
@@ -771,35 +673,25 @@
         }
 
         .cart-panel-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
-            color: var(--brown);
-            margin-bottom: 1.5rem;
-            border-bottom: 2px solid var(--brown-mid);
-            padding-bottom: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #2d2217;
+            margin-bottom: 0.9rem;
         }
 
         .cart-item {
             display: flex;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
+            gap: 0.8rem;
+            margin-bottom: 0.9rem;
             align-items: center;
-            background: rgba(255, 255, 255, 0.4);
-            padding: 0.75rem;
-            border-radius: 0.5rem;
         }
 
         .cart-thumb {
-            width: 80px;
-            height: 70px;
+            width: 70px;
+            height: 60px;
             background: var(--pink-thumb);
-            border: 2px solid var(--brown-mid);
-            border-radius: 0.5rem;
+            border-radius: 0.6rem;
             flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
         }
 
         .cart-item-info {
@@ -807,105 +699,91 @@
         }
 
         .cart-item-name {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             color: #555;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .cart-item-name strong {
-            color: var(--brown);
-            font-family: 'Inter', sans-serif;
-            font-weight: 700;
+            color: #2d2217;
         }
 
         .cart-item-addons {
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             color: #888;
         }
 
         .qty-controls {
             display: flex;
             align-items: center;
-            gap: 0.6rem;
+            gap: 0.4rem;
             flex-shrink: 0;
         }
 
         .qty-btn {
-            width: 32px;
-            height: 32px;
-            background: var(--brown);
+            width: 26px;
+            height: 26px;
+            background: var(--brown-mid);
             color: #fff;
             border: none;
-            border-radius: 4px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.8rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 700;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all .15s;
+            transition: background .15s;
         }
 
         .qty-btn:hover {
-            background: var(--brown-mid);
-            transform: scale(1.1);
+            background: var(--brown);
         }
 
         .qty-num {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
-            min-width: 24px;
+            font-weight: 700;
+            font-size: 0.88rem;
+            min-width: 18px;
             text-align: center;
-            color: var(--brown);
         }
 
         .summary-panel {
             background: var(--summary-bg);
-            border: 2px solid var(--brown);
             border-radius: 0.85rem;
-            padding: 1.5rem;
+            padding: 1.1rem 1.25rem;
         }
 
         .summary-item {
-            font-size: 0.8rem;
+            font-size: 0.76rem;
             color: #2d2217;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
         }
 
         .summary-total {
-            font-family: 'Press Start 2P', monospace;
             font-weight: 700;
-            font-size: 0.75rem;
-            color: var(--brown);
-            margin-top: 1rem;
-            border-top: 2px dashed var(--brown-mid);
-            padding-top: 1rem;
+            font-size: 0.83rem;
+            color: #2d2217;
+            margin-top: 0.75rem;
+            border-top: 1px solid #c0b8ab;
+            padding-top: 0.6rem;
         }
 
         .pay-btn {
-            margin-top: 2rem;
+            margin-top: 1.5rem;
             width: 100%;
-            padding: 1rem;
+            padding: 0.7rem;
             background: var(--brown);
             color: #fff;
             border: none;
-            border-radius: 0.5rem;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.8rem;
+            border-radius: 0.65rem;
+            font-weight: 700;
+            font-size: 0.9rem;
             cursor: pointer;
-            transition: all .2s;
-            box-shadow: 0 4px 0 #3d342c;
+            transition: background .18s;
         }
 
         .pay-btn:hover {
             background: var(--brown-mid);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 0 #3d342c;
-        }
-
-        .pay-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 0px 0 #3d342c;
         }
 
         /* ─── MODALS ─────────────────────────────────────────── */
@@ -1039,6 +917,9 @@
 
 <body>
 
+    <!-- ════════════════════════════════════════════════════════════
+     1. HOME PAGE  (Login / Register tabs)
+════════════════════════════════════════════════════════════ -->
     <div id="home-page">
 
         <div class="home-form-area">
@@ -1052,27 +933,25 @@
             </div>
 
             <!-- LOGIN FORM -->
-            <form id="form-login" class="auth-form active" onsubmit="event.preventDefault();">
+            <div id="form-login" class="auth-form active">
                 <div class="form-group">
                     <div class="input-wrap">
                         <span class="input-icon">👤</span>
-                        <input id="login-username" class="form-input" type="text" placeholder="Username"
-                            autocomplete="username">
+                        <input id="login-username" class="form-input" type="text" placeholder="Username">
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="input-wrap">
                         <span class="input-icon">🔑</span>
-                        <input id="login-password" class="form-input" type="password" placeholder="Password"
-                            autocomplete="current-password">
+                        <input id="login-password" class="form-input" type="password" placeholder="Password">
                     </div>
                 </div>
                 <div id="login-error" class="form-error">Username atau password salah.</div>
-                <button class="auth-btn" type="button" onclick="doLogin()">Login</button>
-            </form>
+                <button class="auth-btn" onclick="doLogin()">Login</button>
+            </div>
 
             <!-- REGISTER FORM -->
-            <form id="form-register" class="auth-form" onsubmit="event.preventDefault();">
+            <div id="form-register" class="auth-form">
                 <div class="form-group">
                     <div class="input-wrap">
                         <span class="input-icon">👤</span>
@@ -1098,21 +977,22 @@
                     </div>
                 </div>
                 <div id="reg-error" class="form-error">Mohon isi semua field.</div>
-                <button class="auth-btn" type="button" onclick="doRegister()">Daftar</button>
-            </form>
+                <button class="auth-btn" onclick="doRegister()">Daftar</button>
+            </div>
         </div>
 
         <!-- Brown wave at bottom -->
         <div class="home-wave">
             <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
-                <path fill="#5C4E40"
-                    d="M0,192L48,197.3C96,203,192,213,288,229.3C384,245,480,267,576,250.7C672,235,768,181,864,181.3C960,181,1056,235,1152,234.7C1248,235,1344,181,1392,154.7L1440,128L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z">
+                <path fill="#5C4E40" d="M0,224 C240,100 480,320 720,240 C960,160 1200,320 1440,220 L1440,320 L0,320 Z">
                 </path>
             </svg>
         </div>
     </div>
 
-
+    <!-- ════════════════════════════════════════════════════════════
+     2. APP SHELL  (sidebar + billboard + main content)
+════════════════════════════════════════════════════════════ -->
     <div id="app-page">
 
         <!-- ── SIDEBAR ─────────────────────────────────────────── -->
@@ -1123,33 +1003,30 @@
             </div>
             <nav class="sidebar-nav">
                 <div class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard')">
-                    <i class="fas fa-home nav-icon-fa"></i>Dashboard
+                    <span class="nav-icon"></span>Dashboard
                 </div>
                 <div class="nav-item" id="nav-mitra" onclick="navigate('mitra')">
-                    <i class="fas fa-handshake nav-icon-fa"></i>Mitra
+                    <span class="nav-icon"></span>Mitra
                 </div>
                 <div class="nav-item" id="nav-list-toko" onclick="navigate('list-toko')">
-                    <i class="fas fa-store nav-icon-fa"></i>List Toko
+                    <span class="nav-icon"></span>List Toko
                 </div>
                 <div class="nav-item" id="nav-cart" onclick="navigate('cart')">
-                    <i class="fas fa-shopping-cart nav-icon-fa"></i>Keranjang
+                    <span class="nav-icon"></span>Keranjang
                     <span class="nav-badge" id="cart-badge">0</span>
                 </div>
             </nav>
             <div class="sidebar-logout" onclick="doLogout()">
-                <i class="fas fa-sign-out-alt logout-icon-fa"></i>Logout
+                <span class="logout-icon">↩</span>Logout
             </div>
         </aside>
 
         <!-- ── BILLBOARD ────────────────────────────────────────── -->
         <header class="billboard">
             <div class="billboard-track">
-                <span class="billboard-text">Hai sahabat! &nbsp;&nbsp;✦&nbsp;&nbsp; Gaji itu ibarat mantan, cuma lewat
-                    doang. jangan lupa makan ya bub &nbsp;&nbsp;✦&nbsp;&nbsp; jangan rindu. ini berat kau takkan kuat.
-                    biar aa aja &nbsp;&nbsp;✦&nbsp;&nbsp;
-                    PROMO HARI INI: DISKON 50% UNTUK SEMUA TOKO YANG BERMITRA, AYO BELANJAAA &nbsp;&nbsp;✦&nbsp;&nbsp;
-                    Kalau liat makanan jangan diliat
-                    liat mas nanti keliatan :D &nbsp;&nbsp;✦&nbsp;&nbsp;</span>
+                <span class="billboard-text">RUNNING TEXT &nbsp;&nbsp;✦&nbsp;&nbsp; Gaji itu ibarat mantan, cuma lewat
+                    doang. jangan lupa makan ya bub &nbsp;&nbsp;✦&nbsp;&nbsp; RUNNING TEXT &nbsp;&nbsp;✦&nbsp;&nbsp;
+                    PROMO HARI INI: DISKON 50% UNTUK SEMUA TOKO MITRA! &nbsp;&nbsp;✦&nbsp;&nbsp;</span>
             </div>
         </header>
 
@@ -1158,13 +1035,9 @@
 
             <!-- DASHBOARD -->
             <div id="view-dashboard" class="view active">
-                <div class="promo-container">
-                    <div class="promo-header">PROMO</div>
-                    <div class="promo-slider-wrapper">
-                        <div class="promo-slider" id="promo-slider">
-                            <!-- Promo items will be injected here -->
-                        </div>
-                    </div>
+                <div class="promo-banner">
+                    <h3>PROMO</h3>
+                    <div class="promo-pill"></div>
                 </div>
                 <div class="store-list" id="dashboard-list"></div>
             </div>
@@ -1218,7 +1091,9 @@
         </main>
     </div>
 
-
+    <!-- ════════════════════════════════════════════════════════════
+     QRIS MODAL
+════════════════════════════════════════════════════════════ -->
     <div id="modal-qris" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-title">Scan QRIS</div>
@@ -1233,6 +1108,9 @@
         </div>
     </div>
 
+    <!-- ════════════════════════════════════════════════════════════
+     SUCCESS MODAL
+════════════════════════════════════════════════════════════ -->
     <div id="modal-success" class="modal-overlay">
         <div class="modal-box">
             <div class="success-icon">✅</div>
@@ -1243,45 +1121,39 @@
     </div>
 
     <script>
-        /* ── DATA (Fetched from PHP/SQL) ────────────────────────────── */
-        <?php
-        $mitras_q = mysqli_query($conn, "SELECT * FROM mitras");
-        $stores_q = mysqli_query($conn, "SELECT * FROM stores");
-        $foods_q = mysqli_query($conn, "SELECT * FROM foods");
-
-        $mitras = mysqli_fetch_all($mitras_q, MYSQLI_ASSOC);
-        $stores = mysqli_fetch_all($stores_q, MYSQLI_ASSOC);
-        $foods_raw = mysqli_fetch_all($foods_q, MYSQLI_ASSOC);
-
-        $foods = [];
-        foreach ($foods_raw as $f) {
-            $foods[$f['store_id']][] = [
-                'id' => (int)$f['id'],
-                'name' => $f['name'],
-                'price' => (int)$f['price']
-            ];
-        }
-        ?>
-
-        const mitras = <?php echo json_encode($mitras); ?>;
-        const stores = <?php echo json_encode($stores); ?>.map(s => ({ ...s, id: parseInt(s.id) }));
-        const foods = <?php echo json_encode($foods); ?>;
-
-        const promoProducts = [
-            { storeId: 1, foodId: 101, name: 'Nasi Rendang', oldPrice: 30000, newPrice: 20000, icon: '🍛', label: 'SUPER DISKON' },
-            { storeId: 2, foodId: 201, name: 'Beef Burger', oldPrice: 40000, newPrice: 25000, icon: '🍔', label: 'PROMO KILAT' },
-            { storeId: 4, foodId: 401, name: 'Pepperoni Pizza', oldPrice: 75000, newPrice: 50000, icon: '🍕', label: 'BEST SELLER' },
-            { storeId: 6, foodId: 602, name: 'Mie Ayam', oldPrice: 22000, newPrice: 15000, icon: '🍜', label: 'MURAH BANGET' },
+        /* ── DATA ──────────────────────────────────────────────────── */
+        const mitras = [
+            { id: 'gojek', name: 'Gojek' },
+            { id: 'shopee', name: 'ShopeeFood' },
+            { id: 'grab', name: 'Grab' },
         ];
+
+        const stores = [
+            { id: 1, name: 'Warung Nasi Padang', mitra: 'gojek', icon: '🍛', info: 'Masakan padang asli & lezat' },
+            { id: 2, name: 'Burger Kingdom', mitra: 'grab', icon: '🍔', info: 'Burger premium & fresh' },
+            { id: 3, name: 'Sushi Master', mitra: 'shopee', icon: '🍣', info: 'Sushi Jepang autentik' },
+            { id: 4, name: 'Pizza Paradise', mitra: 'gojek', icon: '🍕', info: 'Pizza Italia sejati' },
+            { id: 5, name: 'Kopi Kenangan', mitra: 'grab', icon: '☕', info: 'Kopi lokal kekinian' },
+            { id: 6, name: 'Bakso Pak Kumis', mitra: 'shopee', icon: '🍜', info: 'Bakso sapi pilihan' },
+        ];
+
+        const foods = {
+            1: [{ id: 101, name: 'Nasi Rendang', price: 25000 }, { id: 102, name: 'Ayam Pop', price: 20000 }, { id: 103, name: 'Gulai Tunjang', price: 22000 }],
+            2: [{ id: 201, name: 'Beef Burger', price: 35000 }, { id: 202, name: 'Cheese Burger', price: 40000 }, { id: 203, name: 'Chicken Burger', price: 32000 }],
+            3: [{ id: 301, name: 'Salmon Sushi', price: 45000 }, { id: 302, name: 'Tuna Roll', price: 40000 }, { id: 303, name: 'California Roll', price: 38000 }],
+            4: [{ id: 401, name: 'Pepperoni Pizza', price: 65000 }, { id: 402, name: 'Margherita Pizza', price: 55000 }, { id: 403, name: 'Hawaiian Pizza', price: 60000 }],
+            5: [{ id: 501, name: 'Es Kopi Susu', price: 18000 }, { id: 502, name: 'Americano', price: 15000 }, { id: 503, name: 'Cappuccino', price: 20000 }],
+            6: [{ id: 601, name: 'Bakso Urat', price: 20000 }, { id: 602, name: 'Mie Ayam', price: 17000 }, { id: 603, name: 'Bakso Komplit', price: 25000 }],
+        };
 
         /* ── STATE ─────────────────────────────────────────────────── */
         let cart = [];
         let currentView = 'dashboard';
         let prevView = 'dashboard';
         let currentMitra = null;
+        // Simple in-memory user store for demo
+        let users = [{ username: 'admin', password: 'admin', name: 'Admin' }];
         let loggedUser = null;
-        let promoIndex = 0;
-        let promoInterval = null;
 
         /* ── FORMAT ─────────────────────────────────────────────────── */
         const fmt = n => 'Rp ' + n.toLocaleString('id-ID');
@@ -1298,7 +1170,7 @@
         }
 
         /* ── AUTH ───────────────────────────────────────────────────── */
-        async function doLogin() {
+        function doLogin() {
             const username = document.getElementById('login-username').value.trim();
             const password = document.getElementById('login-password').value;
             const errEl = document.getElementById('login-error');
@@ -1309,26 +1181,25 @@
                 return;
             }
 
-            const res = await fetch('api.php?action=login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                loggedUser = data.user;
-                errEl.classList.remove('visible');
-                document.getElementById('login-username').value = '';
-                document.getElementById('login-password').value = '';
-                enterApp(loggedUser);
-            } else {
-                errEl.textContent = data.message;
+            // Check against stored users (demo: accept any filled creds or match stored)
+            const found = users.find(u => u.username === username && u.password === password);
+            if (!found && !(username.length > 0 && password.length > 0)) {
+                errEl.textContent = 'Username atau password salah.';
                 errEl.classList.add('visible');
+                return;
             }
+            // For demo purposes: if user not registered but filled = auto-create guest
+            loggedUser = found || { username, name: username };
+            errEl.classList.remove('visible');
+
+            // Clear inputs
+            document.getElementById('login-username').value = '';
+            document.getElementById('login-password').value = '';
+
+            enterApp(loggedUser);
         }
 
-        async function doRegister() {
+        function doRegister() {
             const name = document.getElementById('reg-name').value.trim();
             const username = document.getElementById('reg-username').value.trim();
             const password = document.getElementById('reg-password').value;
@@ -1340,23 +1211,21 @@
                 errEl.classList.add('visible');
                 return;
             }
-
-            const res = await fetch('api.php?action=register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, username, password, phone })
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                loggedUser = data.user;
-                errEl.classList.remove('visible');
-                ['reg-name', 'reg-username', 'reg-password', 'reg-phone'].forEach(id => document.getElementById(id).value = '');
-                enterApp(loggedUser);
-            } else {
-                errEl.textContent = data.message;
+            if (users.find(u => u.username === username)) {
+                errEl.textContent = 'Username sudah dipakai.';
                 errEl.classList.add('visible');
+                return;
             }
+
+            const newUser = { username, password, name };
+            users.push(newUser);
+            loggedUser = newUser;
+            errEl.classList.remove('visible');
+
+            // Clear inputs
+            ['reg-name', 'reg-username', 'reg-password', 'reg-phone'].forEach(id => document.getElementById(id).value = '');
+
+            enterApp(loggedUser);
         }
 
         function enterApp(user) {
@@ -1386,11 +1255,6 @@
 
         /* ── NAVIGATION ─────────────────────────────────────────────── */
         function navigate(view, data) {
-            // Stop promo slider if leaving dashboard
-            if (view !== 'dashboard' && promoInterval) {
-                clearInterval(promoInterval);
-            }
-
             // Hide all views
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
 
@@ -1424,70 +1288,30 @@
 
         /* ── RENDER FUNCTIONS ───────────────────────────────────────── */
         function renderDashboard() {
-            renderPromoSlider();
-            startPromoSlider();
-
             document.getElementById('dashboard-list').innerHTML = stores.map(s => `
-                <div class="toko-card" onclick="navigate('catalog', ${s.id})">
-                    <div class="toko-card-icon">${s.icon}</div>
-                    <div class="toko-card-name">${s.name}</div>
-                    <div class="toko-card-desc">${s.info}</div>
-                </div>
-            `).join('');
-        }
-
-        function renderPromoSlider() {
-            const slider = document.getElementById('promo-slider');
-            slider.innerHTML = promoProducts.map(p => `
-                <div class="promo-item" onclick="navigate('catalog', ${p.storeId})">
-                    <div class="promo-item-img">${p.icon}</div>
-                    <div class="promo-item-info">
-                        <div class="promo-badge">${p.label}</div>
-                        <div class="promo-item-title">${p.name}</div>
-                        <div class="promo-item-price">
-                            <span class="price-old">${fmt(p.oldPrice)}</span>
-                            <span class="price-new">${fmt(p.newPrice)}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function startPromoSlider() {
-            if (promoInterval) clearInterval(promoInterval);
-            promoIndex = 0;
-            updateSliderPos();
-
-            promoInterval = setInterval(() => {
-                promoIndex = (promoIndex + 1) % promoProducts.length;
-                updateSliderPos();
-            }, 3000);
-        }
-
-        function updateSliderPos() {
-            const slider = document.getElementById('promo-slider');
-            if (slider) {
-                slider.style.transform = `translateX(-${promoIndex * 100}%)`;
-            }
+        <div class="toko-card" onclick="navigate('catalog', ${s.id})">
+            <div class="toko-card-name">${s.icon} ${s.name}</div>
+            <div class="toko-card-desc">${s.info}</div>
+        </div>
+    `).join('');
         }
 
         function renderListToko() {
             document.getElementById('list-toko-title').textContent = 'Semua Toko';
             document.getElementById('toko-grid').innerHTML = stores.map(s => `
-                <div class="toko-card" onclick="navigate('catalog', ${s.id})">
-                    <div class="toko-card-icon">${s.icon}</div>
-                    <div class="toko-card-name">${s.name}</div>
-                    <div class="toko-card-desc">${s.info}</div>
-                </div>
-            `).join('');
+        <div class="toko-card" onclick="navigate('catalog', ${s.id})">
+            <div class="toko-card-name">${s.icon} ${s.name}</div>
+            <div class="toko-card-desc">${s.info}</div>
+        </div>
+    `).join('');
         }
 
         function renderMitra() {
             document.getElementById('mitra-grid').innerHTML = mitras.map(m => `
-                <div class="mitra-card" onclick="clickMitra('${m.id}', '${m.name}')">
-                    <div class="mitra-name">${m.name}</div>
-                </div>
-            `).join('');
+        <div class="mitra-card" onclick="clickMitra('${m.id}', '${m.name}')">
+            <div class="mitra-name">${m.name}</div>
+        </div>
+    `).join('');
         }
 
         function clickMitra(mitraId, mitraName) {
@@ -1500,12 +1324,11 @@
             document.getElementById('toko-mitra-label').textContent = mitraName || 'Mitra';
             const list = stores.filter(s => s.mitra === mitraId);
             document.getElementById('toko-mitra-grid').innerHTML = list.map(s => `
-                <div class="toko-card" onclick="navigate('catalog', ${s.id})">
-                    <div class="toko-card-icon">${s.icon}</div>
-                    <div class="toko-card-name">${s.name}</div>
-                    <div class="toko-card-desc">${s.info}</div>
-                </div>
-            `).join('');
+        <div class="toko-card" onclick="navigate('catalog', ${s.id})">
+            <div class="toko-card-name">${s.icon} ${s.name}</div>
+            <div class="toko-card-desc">${s.info}</div>
+        </div>
+    `).join('');
         }
 
         function renderCatalog(storeId) {
@@ -1585,8 +1408,9 @@
             if (cart.length === 0) { alert('Keranjang masih kosong!'); return; }
             const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
             document.getElementById('qris-total').textContent = fmt(total);
-            // Simbolik QRIS
-            document.getElementById('qr-grid').innerHTML = `<div style="font-size: 4rem;">QR</div>`;
+            // Generate mock QR grid
+            const pattern = [1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1];
+            document.getElementById('qr-grid').innerHTML = pattern.map(p => `<div class="qr-cell${p ? '' : ' w'}"></div>`).join('');
             document.getElementById('modal-qris').classList.add('active');
         }
 
