@@ -5,1036 +5,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistem Pemesanan Makanan - Temukan dan pesan makanan favorit Anda dari berbagai mitra pengiriman.">
     <title>Sistem Pemesanan Makanan</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍔</text></svg>">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <style>
-        /* ─── RESET & TOKENS ─────────────────────────────────── */
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        :root {
-            --beige: #E8DFC8;
-            --beige-dark: #D9CFBA;
-            --brown: #5C4E40;
-            --brown-mid: #7A6A5E;
-            --card-dark: #7A6A60;
-            --card-hover: #6B5C52;
-            --sidebar-bg: #F0EBE0;
-            --sidebar-w: 200px;
-            --billboard-h: 72px;
-            --pink-thumb: #EDD5D0;
-            --summary-bg: #D8D2C8;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--beige);
-            color: #2d2217;
-        }
-
-        /* ─── SECTION VISIBILITY ─────────────────────────────── */
-        .page-section {
-            display: none;
-        }
-
-        .page-section.active {
-            display: block;
-        }
-
-        #app-page {
-            display: none;
-        }
-
-        #app-page.active {
-            display: flex;
-        }
-
-        /* ─── HOME PAGE ──────────────────────────────────────── */
-        #home-page {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-start;
-            background: var(--beige);
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Wave decoration at bottom */
-        .home-wave {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 220px;
-            pointer-events: none;
-        }
-
-        .home-wave svg {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* Form area floats above wave */
-        .home-form-area {
-            position: relative;
-            z-index: 2;
-            width: 100%;
-            max-width: 480px;
-            padding: 0 1.5rem;
-            margin-top: 10vh;
-        }
-
-        .home-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 2.2rem;
-            color: var(--brown);
-            text-align: center;
-            margin-bottom: 3rem;
-            letter-spacing: 2px;
-        }
-
-        /* Tabs */
-        .auth-tabs {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .auth-tab {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.65rem;
-            font-weight: 600;
-            color: #b0a898;
-            padding: 0.4rem 0;
-            border-bottom: 3px solid transparent;
-            transition: all .2s;
-        }
-
-        .auth-tab.active {
-            color: var(--brown);
-            border-bottom-color: var(--brown);
-        }
-
-        .auth-tab:hover {
-            color: var(--brown-mid);
-        }
-
-        /* Form */
-        .auth-form {
-            display: none;
-        }
-
-        .auth-form.active {
-            display: block;
-        }
-
-        .form-group {
-            margin-bottom: 0.85rem;
-        }
-
-        .form-label {
-            display: none;
-            /* hidden, icons replace labels per wireframe */
-        }
-
-        .input-wrap {
-            position: relative;
-        }
-
-        .input-icon {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1rem;
-            color: #b0a898;
-            pointer-events: none;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.9rem 0.9rem 0.9rem 3rem;
-            border: 3px solid #b0a898;
-            border-radius: 0.5rem;
-            font-size: 0.9rem;
-            font-family: 'Inter', sans-serif;
-            background: #f0ebe0;
-            color: #2d2217;
-            outline: none;
-            transition: all .2s;
-        }
-
-        .form-input:focus {
-            border-color: var(--brown);
-            background: #fff;
-        }
-
-        .form-input::placeholder {
-            color: #9e968b;
-        }
-
-        .auth-btn {
-            display: block;
-            margin: 2rem auto 0;
-            padding: 1rem 3rem;
-            background: var(--brown);
-            color: #fff;
-            border: 4px solid #4a3f35;
-            border-radius: 0;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all .2s;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
-            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .auth-btn:hover {
-            background: var(--brown-mid);
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .auth-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 0px 0px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .form-error {
-            font-size: 0.75rem;
-            color: #c0392b;
-            margin-top: 0.5rem;
-            text-align: center;
-            display: none;
-        }
-
-        .form-error.visible {
-            display: block;
-        }
-
-        /* ─── LEFT SIDEBAR ───────────────────────────────────── */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: var(--sidebar-w);
-            height: 100vh;
-            background: var(--sidebar-bg);
-            display: flex;
-            flex-direction: column;
-            z-index: 200;
-            border-right: 1px solid #d5ccbb;
-        }
-
-        .sidebar-profile {
-            display: flex;
-            align-items: center;
-            gap: 0.65rem;
-            padding: 1.2rem 1rem 1rem;
-            border-bottom: 1px solid #d5ccbb;
-        }
-
-        .sidebar-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #c4bfb5;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-            color: #fff;
-            font-weight: 700;
-        }
-
-        .sidebar-username {
-            font-size: 0.55rem;
-            font-weight: 600;
-            color: #2d2217;
-            font-family: 'Press Start 2P', monospace;
-            line-height: 1.5;
-            word-break: break-all;
-        }
-
-        .sidebar-nav {
-            flex: 1;
-            padding: 1rem 0;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            padding: 0.75rem 1rem;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.55rem;
-            line-height: 1.6;
-            font-weight: 500;
-            cursor: pointer;
-            color: #4a3f35;
-            transition: background .15s;
-        }
-
-        .nav-item:hover {
-            background: #ddd8cc;
-        }
-
-        .nav-item.active {
-            background: #d1cbbf;
-            font-weight: 700;
-        }
-
-        .nav-icon-fa {
-            width: 20px;
-            font-size: 0.9rem;
-            color: var(--brown-mid);
-            margin-right: 0.5rem;
-        }
-
-        .nav-item.active .nav-icon-fa {
-            color: var(--brown);
-        }
-
-        .nav-badge {
-            margin-left: auto;
-            background: #c0392b;
-            color: #fff;
-            font-size: 0.55rem;
-            border-radius: 999px;
-            padding: 1px 6px;
-            display: none;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .sidebar-logout {
-            padding: 0.75rem 1rem;
-            border-top: 1px solid #d5ccbb;
-            display: flex;
-            align-items: center;
-            gap: 0.7rem;
-            cursor: pointer;
-            color: #7a2e2e;
-            font-size: 0.55rem;
-            font-family: 'Press Start 2P', monospace;
-            transition: background .15s;
-        }
-
-        .sidebar-logout:hover {
-            background: #ddd8cc;
-        }
-
-        .logout-icon-fa {
-            font-size: 0.9rem;
-            color: #7a2e2e;
-        }
-
-        /* ─── BILLBOARD ──────────────────────────────────────── */
-        .billboard {
-            position: fixed;
-            top: 0;
-            left: var(--sidebar-w);
-            right: 0;
-            height: var(--billboard-h);
-            background: var(--brown);
-            z-index: 100;
-            display: flex;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        .billboard-track {
-            white-space: nowrap;
-            animation: marquee 20s linear infinite;
-        }
-
-        .billboard-text {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 1.2rem;
-            color: #fff;
-            letter-spacing: 2px;
-            display: inline-block;
-            padding-right: 50px;
-        }
-
-        @keyframes marquee {
-            0% {
-                transform: translateX(100vw);
-            }
-
-            100% {
-                transform: translateX(-100%);
-            }
-        }
-
-        /* ─── MAIN CONTENT ───────────────────────────────────── */
-        .main-content {
-            margin-left: var(--sidebar-w);
-            margin-top: var(--billboard-h);
-            min-height: calc(100vh - var(--billboard-h));
-            background: var(--beige);
-            padding: 1.5rem 1.75rem;
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .view {
-            display: none;
-        }
-
-        .view.active {
-            display: block;
-            animation: fadein .25s ease;
-        }
-
-        @keyframes fadein {
-            from {
-                opacity: 0;
-                transform: translateY(6px);
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        /* ─── DASHBOARD PROMO SLIDER ─────────────────────────── */
-        .promo-container {
-            background: var(--beige-dark);
-            border: 3px solid var(--brown);
-            border-radius: 0.85rem;
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .promo-header {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 2rem;
-            color: var(--brown);
-            transform: rotate(-5deg);
-            flex-shrink: 0;
-            border-right: 3px dashed var(--brown-mid);
-            padding-right: 2rem;
-        }
-
-        .promo-slider-wrapper {
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .promo-slider {
-            display: flex;
-            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .promo-item {
-            min-width: 100%;
-            display: flex;
-            align-items: center;
-            gap: 1.5rem;
-            padding: 0.5rem;
-            cursor: pointer;
-        }
-
-        .promo-item-img {
-            width: 100px;
-            height: 90px;
-            background: var(--brown);
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.1);
-        }
-
-        .promo-item-info {
-            flex: 1;
-        }
-
-        .promo-item-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.8rem;
-            color: var(--brown);
-            margin-bottom: 0.5rem;
-        }
-
-        .promo-item-price {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .price-old {
-            font-size: 0.8rem;
-            color: #888;
-            text-decoration: line-through;
-        }
-
-        .price-new {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
-            color: #c0392b;
-        }
-
-        .promo-badge {
-            display: inline-block;
-            background: #c0392b;
-            color: #fff;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.5rem;
-            padding: 0.4rem 0.8rem;
-            border-radius: 0.3rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .store-list {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-            max-height: calc(100vh - var(--billboard-h) - 220px);
-            overflow-y: auto;
-            padding-right: 4px;
-            padding-bottom: 2rem;
-        }
-
-        .store-list::-webkit-scrollbar {
-            width: 5px;
-        }
-
-        .store-list::-webkit-scrollbar-thumb {
-            background: #b0a898;
-            border-radius: 4px;
-        }
-
-        .store-card {
-            background: var(--card-dark);
-            border-radius: 0.85rem;
-            padding: 1rem 1.1rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            cursor: pointer;
-            transition: background .18s;
-        }
-
-        .store-card:hover {
-            background: var(--card-hover);
-        }
-
-        .store-thumb {
-            width: 68px;
-            height: 60px;
-            border-radius: 0.6rem;
-            background: var(--brown);
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-        }
-
-        .store-info-name {
-            font-weight: 700;
-            font-size: 0.95rem;
-            color: #fff;
-        }
-
-        .store-info-desc {
-            font-size: 0.78rem;
-            color: #d8cfc6;
-            margin-top: 2px;
-        }
-
-        /* ─── LIST TOKO ──────────────────────────────────────── */
-        .section-title {
-            font-size: 1.05rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: #2d2217;
-        }
-
-        .toko-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .toko-card {
-            background: var(--card-dark);
-            border-radius: 0.85rem;
-            min-height: 140px;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 1rem;
-            transition: all .2s;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .toko-card:hover {
-            background: var(--card-hover);
-            transform: translateY(-4px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .toko-card-icon {
-            font-size: 2.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .toko-card-name {
-            font-weight: 700;
-            font-size: 0.85rem;
-            color: #fff;
-            font-family: 'Press Start 2P', monospace;
-            line-height: 1.4;
-            margin-bottom: 0.4rem;
-        }
-
-        .toko-card-desc {
-            font-size: 0.7rem;
-            color: #d8cfc6;
-            line-height: 1.3;
-        }
-
-        /* ─── MITRA PAGE ─────────────────────────────────────── */
-        .mitra-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-        }
-
-        .mitra-card {
-            background: var(--card-dark);
-            border-radius: 0.85rem;
-            min-height: 180px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 1.5rem;
-            transition: all .2s;
-            text-align: center;
-            border: 2px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .mitra-card:hover {
-            background: var(--card-hover);
-            transform: scale(1.02);
-            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .mitra-name {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.9rem;
-            color: #fff;
-            line-height: 1.6;
-            letter-spacing: 1px;
-        }
-
-        /* ─── TOKO MITRA ─────────────────────────────────────── */
-        .mitra-filter-label {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1.25rem;
-        }
-
-        .mitra-filter-pill {
-            background: var(--brown-mid);
-            color: #fff;
-            font-weight: 600;
-            padding: 0.55rem 2.5rem;
-            border-radius: 0.75rem;
-            font-size: 0.9rem;
-        }
-
-        /* ─── CATALOG PAGE ───────────────────────────────────── */
-        .back-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 0.82rem;
-            color: var(--brown);
-            font-weight: 600;
-            margin-bottom: 0.75rem;
-            display: flex;
-            align-items: center;
-            gap: 0.35rem;
-            padding: 0;
-        }
-
-        .back-btn:hover {
-            text-decoration: underline;
-        }
-
-        .catalog-store-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #2d2217;
-            margin-bottom: 0.3rem;
-        }
-
-        .catalog-store-sub {
-            font-size: 0.82rem;
-            color: #7a6a5e;
-            margin-bottom: 1.2rem;
-        }
-
-        .food-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-            gap: 0.9rem;
-        }
-
-        .food-card {
-            background: #fff;
-            border: 2px solid var(--brown);
-            border-radius: 0.85rem;
-            padding: 1.25rem;
-            box-shadow: 4px 4px 0 rgba(92, 78, 64, .15);
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-
-        .food-name {
-            font-family: 'Inter', sans-serif;
-            font-weight: 700;
-            font-size: 1rem;
-            color: var(--brown);
-            margin-bottom: 0.2rem;
-        }
-
-        .food-price {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.65rem;
-            color: var(--brown-mid);
-            margin-bottom: 1rem;
-        }
-
-        .add-btn {
-            width: 100%;
-            padding: 0.75rem;
-            background: var(--brown);
-            color: #fff;
-            border: none;
-            border-radius: 0.5rem;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.55rem;
-            cursor: pointer;
-            transition: all .2s;
-        }
-
-        .add-btn:hover {
-            background: var(--brown-mid);
-            transform: translateY(-2px);
-        }
-
-        /* ─── CART PAGE ──────────────────────────────────────── */
-        .cart-layout {
-            display: grid;
-            grid-template-columns: 1fr 280px;
-            gap: 1.25rem;
-            align-items: start;
-        }
-
-        .cart-panel {
-            background: var(--summary-bg);
-            border-radius: 0.85rem;
-            padding: 1.1rem 1.25rem;
-        }
-
-        .cart-panel-title {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
-            color: var(--brown);
-            margin-bottom: 1.5rem;
-            border-bottom: 2px solid var(--brown-mid);
-            padding-bottom: 0.5rem;
-        }
-
-        .cart-item {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 1.25rem;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.4);
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-        }
-
-        .cart-thumb {
-            width: 80px;
-            height: 70px;
-            background: var(--pink-thumb);
-            border: 2px solid var(--brown-mid);
-            border-radius: 0.5rem;
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        .cart-item-info {
-            flex: 1;
-        }
-
-        .cart-item-name {
-            font-size: 0.85rem;
-            color: #555;
-            margin-bottom: 4px;
-        }
-
-        .cart-item-name strong {
-            color: var(--brown);
-            font-family: 'Inter', sans-serif;
-            font-weight: 700;
-        }
-
-        .cart-item-addons {
-            font-size: 0.7rem;
-            color: #888;
-        }
-
-        .qty-controls {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            flex-shrink: 0;
-        }
-
-        .qty-btn {
-            width: 32px;
-            height: 32px;
-            background: var(--brown);
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.8rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all .15s;
-        }
-
-        .qty-btn:hover {
-            background: var(--brown-mid);
-            transform: scale(1.1);
-        }
-
-        .qty-num {
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.7rem;
-            min-width: 24px;
-            text-align: center;
-            color: var(--brown);
-        }
-
-        .summary-panel {
-            background: var(--summary-bg);
-            border: 2px solid var(--brown);
-            border-radius: 0.85rem;
-            padding: 1.5rem;
-        }
-
-        .summary-item {
-            font-size: 0.8rem;
-            color: #2d2217;
-            margin-bottom: 0.5rem;
-        }
-
-        .summary-total {
-            font-family: 'Press Start 2P', monospace;
-            font-weight: 700;
-            font-size: 0.75rem;
-            color: var(--brown);
-            margin-top: 1rem;
-            border-top: 2px dashed var(--brown-mid);
-            padding-top: 1rem;
-        }
-
-        .pay-btn {
-            margin-top: 2rem;
-            width: 100%;
-            padding: 1rem;
-            background: var(--brown);
-            color: #fff;
-            border: none;
-            border-radius: 0.5rem;
-            font-family: 'Press Start 2P', monospace;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: all .2s;
-            box-shadow: 0 4px 0 #3d342c;
-        }
-
-        .pay-btn:hover {
-            background: var(--brown-mid);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 0 #3d342c;
-        }
-
-        .pay-btn:active {
-            transform: translateY(2px);
-            box-shadow: 0 0px 0 #3d342c;
-        }
-
-        /* ─── MODALS ─────────────────────────────────────────── */
-        .modal-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, .5);
-            z-index: 500;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-        }
-
-        .modal-box {
-            background: #fff;
-            border-radius: 1.25rem;
-            padding: 2.25rem 2rem;
-            max-width: 380px;
-            width: 92%;
-            text-align: center;
-            animation: pop .25s ease;
-        }
-
-        @keyframes pop {
-            from {
-                opacity: 0;
-                transform: scale(.92);
-            }
-
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .modal-title {
-            font-weight: 700;
-            font-size: 1.15rem;
-            margin-bottom: 0.5rem;
-            color: #2d2217;
-        }
-
-        .modal-sub {
-            font-size: 0.82rem;
-            color: #888;
-            margin-bottom: 1.25rem;
-        }
-
-        .qr-wrap {
-            width: 170px;
-            height: 170px;
-            margin: 0 auto 1.25rem;
-            background: #f3f3f3;
-            border: 4px solid #2d2217;
-            border-radius: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .qr-inner {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 2px;
-            padding: 8px;
-            width: 100%;
-            height: 100%;
-        }
-
-        .qr-cell {
-            background: #2d2217;
-            border-radius: 1px;
-        }
-
-        .qr-cell.w {
-            background: #f3f3f3;
-        }
-
-        .qr-total {
-            font-weight: 700;
-            font-size: 1.05rem;
-            color: var(--brown);
-            margin-bottom: 1rem;
-        }
-
-        .modal-btn {
-            display: block;
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.75rem;
-            border: none;
-            font-weight: 700;
-            font-size: 0.92rem;
-            cursor: pointer;
-            margin-bottom: 0.6rem;
-            transition: opacity .2s;
-        }
-
-        .modal-btn:hover {
-            opacity: .88;
-        }
-
-        .modal-btn-primary {
-            background: var(--brown);
-            color: #fff;
-        }
-
-        .modal-btn-secondary {
-            background: #e5e1da;
-            color: var(--brown);
-        }
-
-        .success-icon {
-            width: 72px;
-            height: 72px;
-            background: #d4f5e2;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 1.1rem;
-            font-size: 2.2rem;
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 
 <body>
@@ -1051,7 +29,7 @@
                 <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</button>
             </div>
 
-            <!-- LOGIN FORM -->
+            <!-- LOGIN CEES -->
             <form id="form-login" class="auth-form active" onsubmit="event.preventDefault();">
                 <div class="form-group">
                     <div class="input-wrap">
@@ -1071,8 +49,8 @@
                 <button class="auth-btn" type="button" onclick="doLogin()">Login</button>
             </form>
 
-            <!-- REGISTER FORM -->
-            <form id="form-register" class="auth-form" onsubmit="event.preventDefault();">
+            <!-- DAFTARRRRRRRRRRRRRRRRRRRRRRRRRR -->
+            <form id="form-register" class="auth-form" onsubmit="event.preventDefault();" autocomplete="off">
                 <div class="form-group">
                     <div class="input-wrap">
                         <span class="input-icon">👤</span>
@@ -1081,7 +59,7 @@
                 </div>
                 <div class="form-group">
                     <div class="input-wrap">
-                        <span class="input-icon">📝</span>
+                        <span class="input-icon">📌</span>
                         <input id="reg-username" class="form-input" type="text" placeholder="Username">
                     </div>
                 </div>
@@ -1102,7 +80,7 @@
             </form>
         </div>
 
-        <!-- Brown wave at bottom -->
+        <!-- awas ombak -->
         <div class="home-wave">
             <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
                 <path fill="#5C4E40"
@@ -1115,7 +93,7 @@
 
     <div id="app-page">
 
-        <!-- ── SIDEBAR ─────────────────────────────────────────── -->
+        <!-- SIDEBAR  -->
         <aside class="sidebar">
             <div class="sidebar-profile">
                 <div class="sidebar-avatar" id="sidebar-avatar">U</div>
@@ -1131,6 +109,12 @@
                 <div class="nav-item" id="nav-list-toko" onclick="navigate('list-toko')">
                     <i class="fas fa-store nav-icon-fa"></i>List Toko
                 </div>
+                <div class="nav-item" id="nav-compare" onclick="navigate('compare')">
+                    <i class="fas fa-search-dollar nav-icon-fa"></i>Bandingkan Harga
+                </div>
+                <div class="nav-item" id="nav-import" onclick="navigate('import')">
+                    <i class="fas fa-file-import nav-icon-fa"></i>Bulk Import
+                </div>
                 <div class="nav-item" id="nav-cart" onclick="navigate('cart')">
                     <i class="fas fa-shopping-cart nav-icon-fa"></i>Keranjang
                     <span class="nav-badge" id="cart-badge">0</span>
@@ -1141,7 +125,7 @@
             </div>
         </aside>
 
-        <!-- ── BILLBOARD ────────────────────────────────────────── -->
+        <!-- running billboard -->
         <header class="billboard">
             <div class="billboard-track">
                 <span class="billboard-text">Hai sahabat! &nbsp;&nbsp;✦&nbsp;&nbsp; Gaji itu ibarat mantan, cuma lewat
@@ -1153,7 +137,7 @@
             </div>
         </header>
 
-        <!-- ── MAIN CONTENT ──────────────────────────────────────── -->
+        <!-- main nya -->
         <main class="main-content">
 
             <!-- DASHBOARD -->
@@ -1162,21 +146,37 @@
                     <div class="promo-header">PROMO</div>
                     <div class="promo-slider-wrapper">
                         <div class="promo-slider" id="promo-slider">
-                            <!-- Promo items will be injected here -->
                         </div>
                     </div>
+                </div>
+                <div class="section-header">
+                    <h2 class="section-title">Daftar Toko</h2>
+                    <button class="crud-add-btn" onclick="openStoreModal()">
+                        <i class="fas fa-plus"></i> Tambah Toko
+                    </button>
                 </div>
                 <div class="store-list" id="dashboard-list"></div>
             </div>
 
             <!-- LIST TOKO -->
             <div id="view-list-toko" class="view">
-                <h2 class="section-title" id="list-toko-title">Semua Toko</h2>
+                <div class="section-header">
+                    <h2 class="section-title" id="list-toko-title">Semua Toko</h2>
+                    <button class="crud-add-btn" onclick="openStoreModal()">
+                        <i class="fas fa-plus"></i> Tambah Toko
+                    </button>
+                </div>
                 <div class="toko-grid" id="toko-grid"></div>
             </div>
 
             <!-- MITRA -->
             <div id="view-mitra" class="view">
+                <div class="section-header">
+                    <h2 class="section-title">Daftar Mitra</h2>
+                    <button class="crud-add-btn" onclick="openMitraModal()">
+                        <i class="fas fa-plus"></i> Tambah Mitra
+                    </button>
+                </div>
                 <div class="mitra-grid" id="mitra-grid"></div>
             </div>
 
@@ -1191,8 +191,15 @@
             <!-- CATALOG -->
             <div id="view-catalog" class="view">
                 <button class="back-btn" onclick="goBack()">&#8592; Kembali</button>
-                <div class="catalog-store-title" id="catalog-store-title">Nama Toko</div>
-                <div class="catalog-store-sub" id="catalog-store-sub">Info toko</div>
+                <div class="section-header">
+                    <div>
+                        <div class="catalog-store-title" id="catalog-store-title">Nama Toko</div>
+                        <div class="catalog-store-sub" id="catalog-store-sub">Info toko</div>
+                    </div>
+                    <button class="crud-add-btn" id="btn-add-food" onclick="openFoodModal()">
+                        <i class="fas fa-plus"></i> Tambah Menu
+                    </button>
+                </div>
                 <div class="food-grid" id="food-grid"></div>
             </div>
 
@@ -1211,6 +218,70 @@
                     <div class="summary-panel">
                         <div id="cart-summary"></div>
                         <button class="pay-btn" onclick="startPayment()">Bayar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPARE PRICE -->
+            <div id="view-compare" class="view">
+                <h2 class="section-title">Bandingkan Harga Makanan</h2>
+                <div class="compare-search-wrap">
+                    <i class="fas fa-search compare-search-icon"></i>
+                    <input type="text" class="compare-search-input" id="compare-search" placeholder="Cari makanan (misal: nasi, burger, sushi)..." oninput="onCompareSearchInput()">
+                </div>
+                <div class="compare-chips">
+                    <span class="compare-chip" onclick="searchCompareChip('Nasi')">🍚 Nasi</span>
+                    <span class="compare-chip" onclick="searchCompareChip('Burger')">🍔 Burger</span>
+                    <span class="compare-chip" onclick="searchCompareChip('Sushi')">🍣 Sushi</span>
+                    <span class="compare-chip" onclick="searchCompareChip('Pizza')">🍕 Pizza</span>
+                    <span class="compare-chip" onclick="searchCompareChip('Bakso')">🍜 Bakso</span>
+                    <span class="compare-chip" onclick="searchCompareChip('Kopi')">☕ Kopi</span>
+                </div>
+                <div id="compare-empty" style="text-align:center;padding:3rem 0;color:#7a6a5e;">
+                    <div style="font-size:3rem;margin-bottom:.5rem;">🔍</div>
+                    Ketik nama makanan di atas atau pilih kategori cepat untuk membandingkan harga antar-mitra
+                </div>
+                <div class="compare-results" id="compare-results" style="display:none;"></div>
+            </div>
+
+            <!-- BULK IMPORT -->
+            <div id="view-import" class="view">
+                <h2 class="section-title">Bulk Import Toko & Makanan</h2>
+                <div style="background:var(--summary-bg); border: 2px solid var(--brown); border-radius: 0.75rem; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.85rem; line-height: 1.5;">
+                    <strong>Petunjuk Format Input:</strong><br>
+                    1. Salin data dari Excel / Google Sheets, atau ketik baris data terpisah oleh tombol Tab.<br>
+                    2. Format kolom: <code>Toko [Tab] Produk [Tab] Harga [Tab] Varian rasa</code> (atau ada tambahan kolom <code>NO</code> di awal, sistem akan mendeteksi otomatis).<br>
+                    3. Contoh baris data:<br>
+                    <pre style="background:rgba(255,255,255,0.5); padding: 0.5rem; margin-top: 0.5rem; border-radius: 4px; font-size: 0.75rem;">Winmilk	Choco	12000	Choco cheese
+Winmilk	Smoothies	12000	Cheesecake</pre>
+                </div>
+                <div class="import-textarea-wrap">
+                    <textarea class="import-textarea" id="import-textarea" placeholder="Tempel data tabel di sini..."></textarea>
+                </div>
+                <div class="import-btn-group">
+                    <button class="crud-btn crud-btn-save" style="max-width: 200px;" onclick="parseBulkImportText()">Proses & Review</button>
+                    <button class="crud-btn crud-btn-cancel" style="max-width: 200px;" onclick="document.getElementById('import-textarea').value = ''; document.getElementById('import-preview-container').style.display = 'none';">Bersihkan</button>
+                </div>
+
+                <div id="import-preview-container" style="display:none; margin-top: 2rem;">
+                    <h3 class="section-title">Preview Data Hasil Parse</h3>
+                    <div style="overflow-x: auto;">
+                        <table class="import-table">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Toko</th>
+                                    <th>Produk</th>
+                                    <th>Harga</th>
+                                    <th>Varian</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="import-preview-body"></tbody>
+                        </table>
+                    </div>
+                    <div class="import-btn-group">
+                        <button class="crud-btn crud-btn-save" id="btn-confirm-import" style="max-width: 250px; font-size: 0.65rem;" onclick="submitBulkImport()">Konfirmasi Import ke Database</button>
                     </div>
                 </div>
             </div>
@@ -1242,8 +313,100 @@
         </div>
     </div>
 
+    <!-- CRUD MODALS -->
+
+    <!-- Modal: Tambah/Edit Toko -->
+    <div id="modal-store" class="crud-modal-overlay">
+        <div class="crud-modal-box">
+            <div class="crud-modal-title" id="modal-store-title">Tambah Toko</div>
+            <input type="hidden" id="store-edit-id" value="">
+            <div class="crud-form-group">
+                <label class="crud-form-label">Nama Toko</label>
+                <input type="text" class="crud-form-input" id="store-name" placeholder="Contoh: Warung Sate">
+            </div>
+            <div class="crud-form-group">
+                <label class="crud-form-label">Icon (Emoji)</label>
+                <input type="text" class="crud-form-input" id="store-icon" placeholder="🏪" maxlength="4">
+                <div class="emoji-hint">Tekan Win + . untuk emoji picker</div>
+            </div>
+            <div class="crud-form-group">
+                <label class="crud-form-label">Deskripsi</label>
+                <input type="text" class="crud-form-input" id="store-info" placeholder="Contoh: Sate ayam & kambing terenak">
+            </div>
+            <div class="crud-form-group">
+                <label class="crud-form-label">Mitra (opsional)</label>
+                <select class="crud-form-select" id="store-mitra">
+                    <option value="">-- Tanpa Mitra --</option>
+                </select>
+            </div>
+            <div class="crud-btn-group">
+                <button class="crud-btn crud-btn-cancel" onclick="closeCrudModal('modal-store')">Batal</button>
+                <button class="crud-btn crud-btn-save" onclick="saveStore()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Tambah/Edit Makanan -->
+    <div id="modal-food" class="crud-modal-overlay">
+        <div class="crud-modal-box">
+            <div class="crud-modal-title" id="modal-food-title">Tambah Menu</div>
+            <input type="hidden" id="food-edit-id" value="">
+            <input type="hidden" id="food-store-id" value="">
+            <div class="crud-form-group">
+                <label class="crud-form-label">Nama Makanan</label>
+                <input type="text" class="crud-form-input" id="food-name" placeholder="Contoh: Nasi Goreng">
+            </div>
+            <div class="crud-form-group">
+                <label class="crud-form-label">Harga (Rp)</label>
+                <input type="number" class="crud-form-input" id="food-price" placeholder="25000" min="1">
+            </div>
+            <div class="crud-btn-group">
+                <button class="crud-btn crud-btn-cancel" onclick="closeCrudModal('modal-food')">Batal</button>
+                <button class="crud-btn crud-btn-save" onclick="saveFood()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Tambah/Edit Mitra -->
+    <div id="modal-mitra" class="crud-modal-overlay">
+        <div class="crud-modal-box">
+            <div class="crud-modal-title" id="modal-mitra-title">Tambah Mitra</div>
+            <input type="hidden" id="mitra-edit-mode" value="add">
+            <div class="crud-form-group" id="mitra-id-group">
+                <label class="crud-form-label">ID Mitra</label>
+                <input type="text" class="crud-form-input" id="mitra-id" placeholder="Contoh: tokopedia">
+                <div class="emoji-hint">Huruf kecil, tanpa spasi. Tidak bisa diubah setelah dibuat.</div>
+            </div>
+            <div class="crud-form-group">
+                <label class="crud-form-label">Nama Mitra</label>
+                <input type="text" class="crud-form-input" id="mitra-name" placeholder="Contoh: Tokopedia">
+            </div>
+            <div class="crud-btn-group">
+                <button class="crud-btn crud-btn-cancel" onclick="closeCrudModal('modal-mitra')">Batal</button>
+                <button class="crud-btn crud-btn-save" onclick="saveMitra()">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Konfirmasi Hapus -->
+    <div id="modal-delete" class="crud-modal-overlay">
+        <div class="crud-modal-box">
+            <div class="delete-icon">🗑️</div>
+            <div class="crud-modal-title">Yakin Hapus?</div>
+            <div class="delete-confirm-text" id="delete-confirm-text">Apakah kamu yakin ingin menghapus ini?</div>
+            <div class="delete-confirm-name" id="delete-confirm-name"></div>
+            <div class="crud-btn-group">
+                <button class="crud-btn crud-btn-cancel" onclick="closeCrudModal('modal-delete')">Batal</button>
+                <button class="crud-btn crud-btn-danger" id="delete-confirm-btn" onclick="confirmDelete()">Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toast-container"></div>
+
     <script>
-        /* ── DATA (Fetched from PHP/SQL) ────────────────────────────── */
+        /* data fetch */
         <?php
         $mitras_q = mysqli_query($conn, "SELECT * FROM mitras");
         $stores_q = mysqli_query($conn, "SELECT * FROM stores");
@@ -1263,347 +426,18 @@
         }
         ?>
 
-        const mitras = <?php echo json_encode($mitras); ?>;
-        const stores = <?php echo json_encode($stores); ?>.map(s => ({ ...s, id: parseInt(s.id) }));
-        const foods = <?php echo json_encode($foods); ?>;
+        let mitras = <?php echo json_encode($mitras); ?>;
+        let stores = <?php echo json_encode($stores); ?>.map(s => ({ ...s, id: parseInt(s.id) }));
+        let foods = <?php echo json_encode($foods); ?>;
 
-        const promoProducts = [
-            { storeId: 1, foodId: 101, name: 'Nasi Rendang', oldPrice: 30000, newPrice: 20000, icon: '🍛', label: 'SUPER DISKON' },
-            { storeId: 2, foodId: 201, name: 'Beef Burger', oldPrice: 40000, newPrice: 25000, icon: '🍔', label: 'PROMO KILAT' },
-            { storeId: 4, foodId: 401, name: 'Pepperoni Pizza', oldPrice: 75000, newPrice: 50000, icon: '🍕', label: 'BEST SELLER' },
-            { storeId: 6, foodId: 602, name: 'Mie Ayam', oldPrice: 22000, newPrice: 15000, icon: '🍜', label: 'MURAH BANGET' },
-        ];
+        // Normalize food prices to int
+        Object.keys(foods).forEach(k => {
+            foods[k] = foods[k].map(f => ({ ...f, id: parseInt(f.id), price: parseInt(f.price) }));
+        });
 
-        /* ── STATE ─────────────────────────────────────────────────── */
-        let cart = [];
-        let currentView = 'dashboard';
-        let prevView = 'dashboard';
-        let currentMitra = null;
-        let loggedUser = null;
-        let promoIndex = 0;
-        let promoInterval = null;
-
-        /* ── FORMAT ─────────────────────────────────────────────────── */
-        const fmt = n => 'Rp ' + n.toLocaleString('id-ID');
-
-        /* ── TAB SWITCH (Login / Register) ─────────────────────────── */
-        function switchTab(tab) {
-            document.getElementById('home-title').textContent = tab === 'login' ? 'Login' : 'Register';
-            document.getElementById('form-login').classList.toggle('active', tab === 'login');
-            document.getElementById('form-register').classList.toggle('active', tab === 'register');
-            document.getElementById('tab-login').classList.toggle('active', tab === 'login');
-            document.getElementById('tab-register').classList.toggle('active', tab === 'register');
-            document.getElementById('login-error').classList.remove('visible');
-            document.getElementById('reg-error').classList.remove('visible');
-        }
-
-        /* ── AUTH ───────────────────────────────────────────────────── */
-        async function doLogin() {
-            const username = document.getElementById('login-username').value.trim();
-            const password = document.getElementById('login-password').value;
-            const errEl = document.getElementById('login-error');
-
-            if (!username || !password) {
-                errEl.textContent = 'Mohon isi username dan password.';
-                errEl.classList.add('visible');
-                return;
-            }
-
-            const res = await fetch('api.php?action=login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                loggedUser = data.user;
-                errEl.classList.remove('visible');
-                document.getElementById('login-username').value = '';
-                document.getElementById('login-password').value = '';
-                enterApp(loggedUser);
-            } else {
-                errEl.textContent = data.message;
-                errEl.classList.add('visible');
-            }
-        }
-
-        async function doRegister() {
-            const name = document.getElementById('reg-name').value.trim();
-            const username = document.getElementById('reg-username').value.trim();
-            const password = document.getElementById('reg-password').value;
-            const phone = document.getElementById('reg-phone').value.trim();
-            const errEl = document.getElementById('reg-error');
-
-            if (!name || !username || !password || !phone) {
-                errEl.textContent = 'Mohon isi semua field.';
-                errEl.classList.add('visible');
-                return;
-            }
-
-            const res = await fetch('api.php?action=register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, username, password, phone })
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                loggedUser = data.user;
-                errEl.classList.remove('visible');
-                ['reg-name', 'reg-username', 'reg-password', 'reg-phone'].forEach(id => document.getElementById(id).value = '');
-                enterApp(loggedUser);
-            } else {
-                errEl.textContent = data.message;
-                errEl.classList.add('visible');
-            }
-        }
-
-        function enterApp(user) {
-            // Hide home, show app
-            document.getElementById('home-page').style.display = 'none';
-            document.getElementById('app-page').style.display = 'flex';
-
-            // Set username in sidebar
-            const initials = user.name ? user.name.charAt(0).toUpperCase() : 'U';
-            document.getElementById('sidebar-avatar').textContent = initials;
-            document.getElementById('sidebar-username').textContent = user.username || user.name;
-
-            navigate('dashboard');
-        }
-
-        function doLogout() {
-            loggedUser = null;
-            cart = [];
-            updateBadge();
-
-            document.getElementById('app-page').style.display = 'none';
-            document.getElementById('home-page').style.display = 'flex';
-
-            // Reset tab to login
-            switchTab('login');
-        }
-
-        /* ── NAVIGATION ─────────────────────────────────────────────── */
-        function navigate(view, data) {
-            // Stop promo slider if leaving dashboard
-            if (view !== 'dashboard' && promoInterval) {
-                clearInterval(promoInterval);
-            }
-
-            // Hide all views
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-
-            // Sidebar highlight
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            const navMap = {
-                'dashboard': 'nav-dashboard',
-                'mitra': 'nav-mitra',
-                'list-toko': 'nav-list-toko',
-                'toko-mitra': 'nav-mitra',
-                'catalog': 'nav-list-toko',
-                'cart': 'nav-cart',
-            };
-            if (navMap[view]) document.getElementById(navMap[view]).classList.add('active');
-
-            if (view !== 'catalog') prevView = view;
-            currentView = view;
-
-            document.getElementById('view-' + view).classList.add('active');
-
-            // Render content
-            if (view === 'dashboard') renderDashboard();
-            if (view === 'list-toko') renderListToko();
-            if (view === 'mitra') renderMitra();
-            if (view === 'toko-mitra') renderTokoMitra(data);
-            if (view === 'catalog') renderCatalog(data);
-            if (view === 'cart') renderCart();
-        }
-
-        function goBack() { navigate(prevView, currentMitra); }
-
-        /* ── RENDER FUNCTIONS ───────────────────────────────────────── */
-        function renderDashboard() {
-            renderPromoSlider();
-            startPromoSlider();
-
-            document.getElementById('dashboard-list').innerHTML = stores.map(s => `
-                <div class="toko-card" onclick="navigate('catalog', ${s.id})">
-                    <div class="toko-card-icon">${s.icon}</div>
-                    <div class="toko-card-name">${s.name}</div>
-                    <div class="toko-card-desc">${s.info}</div>
-                </div>
-            `).join('');
-        }
-
-        function renderPromoSlider() {
-            const slider = document.getElementById('promo-slider');
-            slider.innerHTML = promoProducts.map(p => `
-                <div class="promo-item" onclick="navigate('catalog', ${p.storeId})">
-                    <div class="promo-item-img">${p.icon}</div>
-                    <div class="promo-item-info">
-                        <div class="promo-badge">${p.label}</div>
-                        <div class="promo-item-title">${p.name}</div>
-                        <div class="promo-item-price">
-                            <span class="price-old">${fmt(p.oldPrice)}</span>
-                            <span class="price-new">${fmt(p.newPrice)}</span>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function startPromoSlider() {
-            if (promoInterval) clearInterval(promoInterval);
-            promoIndex = 0;
-            updateSliderPos();
-
-            promoInterval = setInterval(() => {
-                promoIndex = (promoIndex + 1) % promoProducts.length;
-                updateSliderPos();
-            }, 3000);
-        }
-
-        function updateSliderPos() {
-            const slider = document.getElementById('promo-slider');
-            if (slider) {
-                slider.style.transform = `translateX(-${promoIndex * 100}%)`;
-            }
-        }
-
-        function renderListToko() {
-            document.getElementById('list-toko-title').textContent = 'Semua Toko';
-            document.getElementById('toko-grid').innerHTML = stores.map(s => `
-                <div class="toko-card" onclick="navigate('catalog', ${s.id})">
-                    <div class="toko-card-icon">${s.icon}</div>
-                    <div class="toko-card-name">${s.name}</div>
-                    <div class="toko-card-desc">${s.info}</div>
-                </div>
-            `).join('');
-        }
-
-        function renderMitra() {
-            document.getElementById('mitra-grid').innerHTML = mitras.map(m => `
-                <div class="mitra-card" onclick="clickMitra('${m.id}', '${m.name}')">
-                    <div class="mitra-name">${m.name}</div>
-                </div>
-            `).join('');
-        }
-
-        function clickMitra(mitraId, mitraName) {
-            currentMitra = { mitraId, mitraName };
-            navigate('toko-mitra', { mitraId, mitraName });
-        }
-
-        function renderTokoMitra(data) {
-            const { mitraId, mitraName } = data || {};
-            document.getElementById('toko-mitra-label').textContent = mitraName || 'Mitra';
-            const list = stores.filter(s => s.mitra === mitraId);
-            document.getElementById('toko-mitra-grid').innerHTML = list.map(s => `
-                <div class="toko-card" onclick="navigate('catalog', ${s.id})">
-                    <div class="toko-card-icon">${s.icon}</div>
-                    <div class="toko-card-name">${s.name}</div>
-                    <div class="toko-card-desc">${s.info}</div>
-                </div>
-            `).join('');
-        }
-
-        function renderCatalog(storeId) {
-            const store = stores.find(s => s.id === storeId);
-            if (!store) return;
-            document.getElementById('catalog-store-title').textContent = store.name;
-            document.getElementById('catalog-store-sub').textContent = store.info;
-            document.getElementById('food-grid').innerHTML = (foods[storeId] || []).map(f => `
-        <div class="food-card">
-            <div class="food-name">${f.name}</div>
-            <div class="food-price">${fmt(f.price)}</div>
-            <button class="add-btn" onclick="addToCart(${f.id}, '${f.name}', ${f.price})">Tambah ke Keranjang</button>
-        </div>
-    `).join('');
-        }
-
-        /* ── CART ───────────────────────────────────────────────────── */
-        function addToCart(id, name, price) {
-            const ex = cart.find(i => i.id === id);
-            if (ex) ex.qty++;
-            else cart.push({ id, name, price, qty: 1 });
-            updateBadge();
-        }
-
-        function changeQty(id, delta) {
-            const item = cart.find(i => i.id === id);
-            if (!item) return;
-            item.qty += delta;
-            if (item.qty <= 0) cart = cart.filter(i => i.id !== id);
-            updateBadge();
-            if (currentView === 'cart') renderCart();
-        }
-
-        function updateBadge() {
-            const total = cart.reduce((s, i) => s + i.qty, 0);
-            const badge = document.getElementById('cart-badge');
-            badge.textContent = total;
-            badge.style.display = total > 0 ? 'inline' : 'none';
-        }
-
-        function renderCart() {
-            const layout = document.getElementById('cart-layout');
-            const empty = document.getElementById('cart-empty');
-
-            if (cart.length === 0) {
-                layout.style.display = 'none';
-                empty.style.display = 'block';
-                return;
-            }
-            layout.style.display = 'grid';
-            empty.style.display = 'none';
-
-            document.getElementById('cart-items').innerHTML = cart.map(item => `
-        <div class="cart-item">
-            <div class="cart-thumb"></div>
-            <div class="cart-item-info">
-                <div class="cart-item-name"><strong>nama makanan :</strong> ${item.name}</div>
-                <div class="cart-item-addons">addons: -</div>
-            </div>
-            <div class="qty-controls">
-                <button class="qty-btn" onclick="changeQty(${item.id}, -1)">−</button>
-                <span class="qty-num">${item.qty}</span>
-                <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
-            </div>
-        </div>
-    `).join('');
-
-            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            document.getElementById('cart-summary').innerHTML = `
-        ${cart.map(i => `<div class="summary-item">${i.name} x${i.qty}</div>`).join('')}
-        <div class="summary-total">total : ${fmt(total)}</div>
-    `;
-        }
-
-        /* ── PAYMENT ────────────────────────────────────────────────── */
-        function startPayment() {
-            if (cart.length === 0) { alert('Keranjang masih kosong!'); return; }
-            const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
-            document.getElementById('qris-total').textContent = fmt(total);
-            // Simbolik QRIS
-            document.getElementById('qr-grid').innerHTML = `<div style="font-size: 4rem;">QR</div>`;
-            document.getElementById('modal-qris').classList.add('active');
-        }
-
-        function simulatePayment() {
-            closeModal('modal-qris');
-            document.getElementById('modal-success').classList.add('active');
-        }
-
-        function finishPayment() {
-            closeModal('modal-success');
-            cart = [];
-            updateBadge();
-            navigate('dashboard');
-        }
-
-        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
     </script>
+    <script src="js/app.js"></script>
 </body>
-
 </html>
+
+
