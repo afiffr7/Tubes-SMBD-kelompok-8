@@ -2,7 +2,6 @@
 
 Website yang belum terealisasikan
 
-- SCRUD WEBSITE
-- ADMIN PANEL
+- ADMIN PANEL (masi dikit maseh -frontend tercinta)
 - FILTER
 - SHOW BY
