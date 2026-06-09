@@ -18,6 +18,13 @@ const promoProducts = [
         /* FORMAT */
         const fmt = n => 'Rp ' + n.toLocaleString('id-ID');
 
+        /* XSS SANITIZER — neutralize HTML tags in user-generated text */
+        function escHTML(str) {
+            return (str || '').replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag]));
+        }
+
         /* TOAST */
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
@@ -61,7 +68,7 @@ const promoProducts = [
 
             // Populate mitra dropdown
             mitraEl.innerHTML = '<option value="">-- Tanpa Mitra --</option>' +
-                mitras.map(m => `<option value="${m.id}">${m.name}</option>`).join('');
+                mitras.map(m => `<option value="${escHTML(m.id)}">${escHTML(m.name)}</option>`).join('');
 
             if (storeId) {
                 const store = stores.find(s => s.id === storeId);
@@ -404,7 +411,14 @@ const promoProducts = [
             navigate('dashboard');
         }
 
-        function doLogout() {
+        async function doLogout() {
+            // Destroy server session
+            try {
+                await fetch('api.php?action=logout', { method: 'POST' });
+            } catch (e) {
+                console.error('Logout session error:', e);
+            }
+
             loggedUser = null;
             cart = [];
             updateBadge();
@@ -513,7 +527,7 @@ const promoProducts = [
                 emptyContainer.style.display = 'block';
                 emptyContainer.innerHTML = `
                     <div style="font-size:3rem;margin-bottom:.5rem;">😢</div>
-                    Tidak ada makanan yang cocok dengan pencarian "${query}"
+                    Tidak ada makanan yang cocok dengan pencarian "${escHTML(query)}"
                 `;
                 return;
             }
@@ -534,12 +548,12 @@ const promoProducts = [
                 return `
                     <div class="compare-item-card">
                         <div class="compare-item-left">
-                            <div class="compare-store-icon">${m.store.icon || '🏪'}</div>
+                            <div class="compare-store-icon">${escHTML(m.store.icon) || '🏪'}</div>
                             <div class="compare-food-details">
-                                <div class="compare-food-title">${m.name}</div>
+                                <div class="compare-food-title">${escHTML(m.name)}</div>
                                 <div class="compare-store-meta">
-                                    <span>di <strong>${m.store.name}</strong></span>
-                                    <span class="mitra-badge ${badgeClass}">${mitraName}</span>
+                                    <span>di <strong>${escHTML(m.store.name)}</strong></span>
+                                    <span class="mitra-badge ${badgeClass}">${escHTML(mitraName)}</span>
                                 </div>
                             </div>
                         </div>
@@ -589,20 +603,20 @@ const promoProducts = [
             }
             
             try {
-                const res = await fetch(`api.php?action=get_orders&user_id=${loggedUser.id}`);
+                const res = await fetch('api.php?action=get_orders');
                 const data = await res.json();
                 
                 if (data.success && data.orders && data.orders.length > 0) {
                     listContainer.innerHTML = data.orders.map(o => `
                         <div style="background: var(--summary-bg); border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem;">
                             <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 0.5rem; margin-bottom: 0.5rem;">
-                                <strong>Pesanan #${o.id}</strong>
-                                <span>${new Date(o.created_at).toLocaleString('id-ID')}</span>
+                                <strong>Pesanan #${escHTML(String(o.id))}</strong>
+                                <span>${escHTML(new Date(o.created_at).toLocaleString('id-ID'))}</span>
                             </div>
                             ${(o.items || []).map(i => `
                                 <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 0.25rem;">
-                                    <span>${i.food_name} x${i.qty}</span>
-                                    <span>${fmt(i.qty * i.price)}</span>
+                                    <span>${escHTML(i.food_name)} x${parseInt(i.qty)}</span>
+                                    <span>${fmt(parseInt(i.qty) * parseInt(i.price))}</span>
                                 </div>
                             `).join('')}
                             <div style="display: flex; justify-content: space-between; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 0.5rem; margin-top: 0.5rem; font-weight: bold;">
@@ -701,10 +715,10 @@ const promoProducts = [
             previewBody.innerHTML = parsedItems.map((item, idx) => `
                 <tr>
                     <td>${idx + 1}</td>
-                    <td><strong>${item.store}</strong></td>
-                    <td>${item.product}</td>
+                    <td><strong>${escHTML(item.store)}</strong></td>
+                    <td>${escHTML(item.product)}</td>
                     <td>${fmt(item.price)}</td>
-                    <td>${item.variant}</td>
+                    <td>${escHTML(item.variant)}</td>
                     <td><span style="color:#27ae60; font-weight: bold;">Valid</span></td>
                 </tr>
             `).join('');
@@ -766,9 +780,9 @@ const promoProducts = [
                         <button class="card-action-btn edit-btn" onclick="openStoreModal(${s.id})" title="Edit"><i class="fas fa-pen"></i></button>
                         <button class="card-action-btn delete-btn" onclick="openDeleteModal('store', ${s.id}, '${escAttr(s.name)}')" title="Hapus"><i class="fas fa-trash"></i></button>
                     </div>
-                    <div class="toko-card-icon">${s.icon}</div>
-                    <div class="toko-card-name">${s.name}</div>
-                    <div class="toko-card-desc">${s.info}</div>
+                    <div class="toko-card-icon">${escHTML(s.icon)}</div>
+                    <div class="toko-card-name">${escHTML(s.name)}</div>
+                    <div class="toko-card-desc">${escHTML(s.info)}</div>
                 </div>
             `).join('');
         }
@@ -777,10 +791,10 @@ const promoProducts = [
             const slider = document.getElementById('promo-slider');
             slider.innerHTML = promoProducts.map(p => `
                 <div class="promo-item" onclick="navigate('catalog', ${p.storeId})">
-                    <div class="promo-item-img">${p.icon}</div>
+                    <div class="promo-item-img">${escHTML(p.icon)}</div>
                     <div class="promo-item-info">
-                        <div class="promo-badge">${p.label}</div>
-                        <div class="promo-item-title">${p.name}</div>
+                        <div class="promo-badge">${escHTML(p.label)}</div>
+                        <div class="promo-item-title">${escHTML(p.name)}</div>
                         <div class="promo-item-price">
                             <span class="price-old">${fmt(p.oldPrice)}</span>
                             <span class="price-new">${fmt(p.newPrice)}</span>
@@ -816,21 +830,21 @@ const promoProducts = [
                         <button class="card-action-btn edit-btn" onclick="openStoreModal(${s.id})" title="Edit"><i class="fas fa-pen"></i></button>
                         <button class="card-action-btn delete-btn" onclick="openDeleteModal('store', ${s.id}, '${escAttr(s.name)}')" title="Hapus"><i class="fas fa-trash"></i></button>
                     </div>
-                    <div class="toko-card-icon">${s.icon}</div>
-                    <div class="toko-card-name">${s.name}</div>
-                    <div class="toko-card-desc">${s.info}</div>
+                    <div class="toko-card-icon">${escHTML(s.icon)}</div>
+                    <div class="toko-card-name">${escHTML(s.name)}</div>
+                    <div class="toko-card-desc">${escHTML(s.info)}</div>
                 </div>
             `).join('');
         }
 
         function renderMitra() {
             document.getElementById('mitra-grid').innerHTML = mitras.map(m => `
-                <div class="mitra-card" onclick="clickMitra('${m.id}', '${escAttr(m.name)}')">
+                <div class="mitra-card" onclick="clickMitra('${escAttr(m.id)}', '${escAttr(m.name)}')">
                     <div class="card-actions" onclick="event.stopPropagation()">
-                        <button class="card-action-btn edit-btn" onclick="openMitraModal('${m.id}')" title="Edit"><i class="fas fa-pen"></i></button>
-                        <button class="card-action-btn delete-btn" onclick="openDeleteModal('mitra', '${m.id}', '${escAttr(m.name)}')" title="Hapus"><i class="fas fa-trash"></i></button>
+                        <button class="card-action-btn edit-btn" onclick="openMitraModal('${escAttr(m.id)}')" title="Edit"><i class="fas fa-pen"></i></button>
+                        <button class="card-action-btn delete-btn" onclick="openDeleteModal('mitra', '${escAttr(m.id)}', '${escAttr(m.name)}')" title="Hapus"><i class="fas fa-trash"></i></button>
                     </div>
-                    <div class="mitra-name">${m.name}</div>
+                    <div class="mitra-name">${escHTML(m.name)}</div>
                 </div>
             `).join('');
         }
@@ -850,9 +864,9 @@ const promoProducts = [
                         <button class="card-action-btn edit-btn" onclick="openStoreModal(${s.id})" title="Edit"><i class="fas fa-pen"></i></button>
                         <button class="card-action-btn delete-btn" onclick="openDeleteModal('store', ${s.id}, '${escAttr(s.name)}')" title="Hapus"><i class="fas fa-trash"></i></button>
                     </div>
-                    <div class="toko-card-icon">${s.icon}</div>
-                    <div class="toko-card-name">${s.name}</div>
-                    <div class="toko-card-desc">${s.info}</div>
+                    <div class="toko-card-icon">${escHTML(s.icon)}</div>
+                    <div class="toko-card-name">${escHTML(s.name)}</div>
+                    <div class="toko-card-desc">${escHTML(s.info)}</div>
                 </div>
             `).join('');
         }
@@ -869,7 +883,7 @@ const promoProducts = [
                 <button class="card-action-btn edit-btn" onclick="openFoodModal(${f.id})" title="Edit"><i class="fas fa-pen"></i></button>
                 <button class="card-action-btn delete-btn" onclick="openDeleteModal('food', ${f.id}, '${escAttr(f.name)}')" title="Hapus"><i class="fas fa-trash"></i></button>
             </div>
-            <div class="food-name">${f.name}</div>
+            <div class="food-name">${escHTML(f.name)}</div>
             <div class="food-price">${fmt(f.price)}</div>
             <button class="add-btn" onclick="addToCart(${f.id}, '${escAttr(f.name)}', ${f.price})">Tambah ke Keranjang</button>
         </div>
@@ -935,7 +949,7 @@ const promoProducts = [
         <div class="cart-item">
             <div class="cart-thumb"></div>
             <div class="cart-item-info">
-                <div class="cart-item-name"><strong>nama makanan :</strong> ${item.name}</div>
+                <div class="cart-item-name"><strong>nama makanan :</strong> ${escHTML(item.name)}</div>
                 <div class="cart-item-addons"></div>
             </div>
             <div class="qty-controls">
@@ -948,7 +962,7 @@ const promoProducts = [
 
             const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
             document.getElementById('cart-summary').innerHTML = `
-        ${cart.map(i => `<div class="summary-item">${i.name} x${i.qty}</div>`).join('')}
+        ${cart.map(i => `<div class="summary-item">${escHTML(i.name)} x${i.qty}</div>`).join('')}
         <div class="summary-total">total : ${fmt(total)}</div>
     `;
         }
@@ -970,13 +984,13 @@ const promoProducts = [
             const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
             document.querySelector('#modal-qris .modal-btn-primary').textContent = 'Memproses...';
             try {
+                // Kirim hanya food id + qty ke server. Server akan hitung harga sendiri dari DB.
+                const checkoutItems = cart.map(i => ({ id: i.id, qty: i.qty }));
                 const res = await fetch('api.php?action=checkout', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        user_id: loggedUser ? loggedUser.id : 1,
-                        total_price: total,
-                        items: cart
+                        items: checkoutItems
                     })
                 });
                 const data = await res.json();

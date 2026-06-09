@@ -1,8 +1,26 @@
 <?php
+session_start();
 include 'koneksi.php';
 header('Content-Type: application/json');
 
 $action = $_GET['action'] ?? '';
+
+// ===== HELPER: Cek apakah user sudah login =====
+function requireLogin() {
+    if (!isset($_SESSION['user_id'])) {
+        echo json_encode(['success' => false, 'message' => 'Anda harus login terlebih dahulu.']);
+        exit;
+    }
+}
+
+// ===== HELPER: Cek apakah user adalah admin =====
+function requireAdmin() {
+    requireLogin();
+    if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+        echo json_encode(['success' => false, 'message' => 'Akses ditolak! Hanya admin yang bisa melakukan aksi ini.']);
+        exit;
+    }
+}
 
 // ===== AUTH =====
 
@@ -17,11 +35,22 @@ if ($action == 'login') {
     if (mysqli_num_rows($result) > 0) {
         $user = mysqli_fetch_assoc($result);
         if (password_verify($password, $user['password'])) {
+            // Set session
+            $_SESSION['user_id'] = (int)$user['id'];
+            $_SESSION['role'] = $user['role'];
+            $_SESSION['username'] = $user['username'];
+
             unset($user['password']);
             echo json_encode(['success' => true, 'user' => $user]);
         } else if ($password === $user['password']) {
             $newHash = password_hash($password, PASSWORD_DEFAULT);
             mysqli_query($conn, "UPDATE users SET password='$newHash' WHERE id=" . $user['id']);
+
+            // Set session
+            $_SESSION['user_id'] = (int)$user['id'];
+            $_SESSION['role'] = $user['role'];
+            $_SESSION['username'] = $user['username'];
+
             unset($user['password']);
             echo json_encode(['success' => true, 'user' => $user]);
         } else {
@@ -48,10 +77,23 @@ if ($action == 'register') {
 
     $query = "INSERT INTO users (name, username, password, phone) VALUES ('$name', '$username', '$password', '$phone')";
     if (mysqli_query($conn, $query)) {
-        echo json_encode(['success' => true, 'user' => ['username' => $username, 'name' => $name, 'role' => 'user']]);
+        $newUserId = mysqli_insert_id($conn);
+
+        // Set session setelah register
+        $_SESSION['user_id'] = $newUserId;
+        $_SESSION['role'] = 'user';
+        $_SESSION['username'] = $username;
+
+        echo json_encode(['success' => true, 'user' => ['id' => $newUserId, 'username' => $username, 'name' => $name, 'role' => 'user']]);
     } else {
         echo json_encode(['success' => false, 'message' => 'Gagal mendaftar.']);
     }
+}
+
+if ($action == 'logout') {
+    session_unset();
+    session_destroy();
+    echo json_encode(['success' => true, 'message' => 'Logout berhasil.']);
 }
 
 if ($action == 'get_data') {
@@ -71,9 +113,11 @@ if ($action == 'get_data') {
     ]);
 }
 
-// ===== CRUD STORES =====
+// ===== CRUD STORES (Admin Only) =====
 
 if ($action == 'add_store') {
+    requireAdmin();
+
     $data = json_decode(file_get_contents('php://input'), true);
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
     $mitra_id = mysqli_real_escape_string($conn, $data['mitra_id'] ?? '');
@@ -95,6 +139,8 @@ if ($action == 'add_store') {
 }
 
 if ($action == 'update_store') {
+    requireAdmin();
+
     $data = json_decode(file_get_contents('php://input'), true);
     $id = (int)($data['id'] ?? 0);
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
@@ -116,6 +162,8 @@ if ($action == 'update_store') {
 }
 
 if ($action == 'delete_store') {
+    requireAdmin();
+
     $data = json_decode(file_get_contents('php://input'), true);
     $id = (int)($data['id'] ?? 0);
 
@@ -134,9 +182,11 @@ if ($action == 'delete_store') {
     }
 }
 
-// ===== CRUD FOODS =====
+// ===== CRUD FOODS (Admin Only) =====
 
 if ($action == 'add_food') {
+    requireAdmin();
+
     $data = json_decode(file_get_contents('php://input'), true);
     $store_id = (int)($data['store_id'] ?? 0);
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
@@ -157,6 +207,8 @@ if ($action == 'add_food') {
 }
 
 if ($action == 'update_food') {
+    requireAdmin();
+
     $data = json_decode(file_get_contents('php://input'), true);
     $id = (int)($data['id'] ?? 0);
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
@@ -176,6 +228,8 @@ if ($action == 'update_food') {
 }
 
 if ($action == 'delete_food') {
+    requireAdmin();
+
     $data = json_decode(file_get_contents('php://input'), true);
     $id = (int)($data['id'] ?? 0);
 
@@ -191,9 +245,11 @@ if ($action == 'delete_food') {
     }
 }
 
-// ===== CRUD MITRAS =====
+// ===== CRUD MITRAS (Admin Only) =====
 
 if ($action == 'add_mitra') {
+    requireAdmin();
+
     $data = json_decode(file_get_contents('php://input'), true);
     $id = mysqli_real_escape_string($conn, $data['id'] ?? '');
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
@@ -219,6 +275,8 @@ if ($action == 'add_mitra') {
 }
 
 if ($action == 'update_mitra') {
+    requireAdmin();
+
     $data = json_decode(file_get_contents('php://input'), true);
     $id = mysqli_real_escape_string($conn, $data['id'] ?? '');
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
@@ -237,6 +295,8 @@ if ($action == 'update_mitra') {
 }
 
 if ($action == 'delete_mitra') {
+    requireAdmin();
+
     $data = json_decode(file_get_contents('php://input'), true);
     $id = mysqli_real_escape_string($conn, $data['id'] ?? '');
 
@@ -261,6 +321,8 @@ if ($action == 'delete_mitra') {
 }
 
 if ($action == 'bulk_add_foods') {
+    requireAdmin();
+
     $data = json_decode(file_get_contents('php://input'), true);
     $items = $data['items'] ?? [];
     
@@ -320,23 +382,60 @@ if ($action == 'bulk_add_foods') {
 // ===== ORDERS =====
 
 if ($action == 'checkout') {
+    requireLogin();
+
     $data = json_decode(file_get_contents('php://input'), true);
-    $user_id = (int)($data['user_id'] ?? 0);
-    $total_price = (int)($data['total_price'] ?? 0);
+    // FIX #1: Ambil user_id dari session, BUKAN dari client
+    $user_id = (int)$_SESSION['user_id'];
     $items = $data['items'] ?? [];
 
-    if ($user_id <= 0 || empty($items)) {
-        echo json_encode(['success' => false, 'message' => 'Data tidak valid.']);
+    if (empty($items)) {
+        echo json_encode(['success' => false, 'message' => 'Data tidak valid. Keranjang kosong.']);
         exit;
     }
 
+    // FIX #2: Hitung total_price di SERVER dari database, BUKAN dari client
+    $total_price = 0;
+    $validated_items = [];
+
+    foreach ($items as $item) {
+        $food_id = (int)($item['id'] ?? 0);
+        $qty = (int)($item['qty'] ?? 0);
+
+        if ($food_id <= 0 || $qty <= 0) {
+            echo json_encode(['success' => false, 'message' => 'Item tidak valid: food_id atau qty kosong.']);
+            exit;
+        }
+
+        // Query harga langsung dari database
+        $food_query = mysqli_query($conn, "SELECT id, name, price FROM foods WHERE id = $food_id");
+        if (mysqli_num_rows($food_query) == 0) {
+            echo json_encode(['success' => false, 'message' => "Menu dengan ID $food_id tidak ditemukan."]);
+            exit;
+        }
+
+        $food_row = mysqli_fetch_assoc($food_query);
+        $server_price = (int)$food_row['price'];
+        $server_name = $food_row['name'];
+
+        $validated_items[] = [
+            'food_id' => $food_id,
+            'food_name' => $server_name,
+            'qty' => $qty,
+            'price' => $server_price
+        ];
+
+        $total_price += $server_price * $qty;
+    }
+
+    // Insert order dengan harga yang dihitung server
     if (mysqli_query($conn, "INSERT INTO orders (user_id, total_price) VALUES ($user_id, $total_price)")) {
         $order_id = mysqli_insert_id($conn);
-        foreach ($items as $item) {
-            $food_id = (int)$item['id'];
-            $food_name = mysqli_real_escape_string($conn, $item['name']);
-            $qty = (int)$item['qty'];
-            $price = (int)$item['price'];
+        foreach ($validated_items as $vi) {
+            $food_id = $vi['food_id'];
+            $food_name = mysqli_real_escape_string($conn, $vi['food_name']);
+            $qty = $vi['qty'];
+            $price = $vi['price'];
             mysqli_query($conn, "INSERT INTO order_items (order_id, food_id, food_name, qty, price) VALUES ($order_id, $food_id, '$food_name', $qty, $price)");
         }
         echo json_encode(['success' => true, 'message' => 'Pesanan berhasil dibuat.']);
@@ -346,7 +445,11 @@ if ($action == 'checkout') {
 }
 
 if ($action == 'get_orders') {
-    $user_id = (int)($_GET['user_id'] ?? 0);
+    requireLogin();
+
+    // FIX #3: Ambil user_id dari session, BUKAN dari $_GET (IDOR fix)
+    $user_id = (int)$_SESSION['user_id'];
+
     $query = "SELECT * FROM orders WHERE user_id = $user_id ORDER BY created_at DESC";
     $orders_q = mysqli_query($conn, $query);
     $orders = mysqli_fetch_all($orders_q, MYSQLI_ASSOC);

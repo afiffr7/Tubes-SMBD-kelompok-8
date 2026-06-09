@@ -1,4 +1,4 @@
-<?php include 'koneksi.php'; ?>
+<?php session_start(); include 'koneksi.php'; ?>
 <!DOCTYPE html>
 <html lang="id">
 
@@ -119,6 +119,9 @@
                     <i class="fas fa-shopping-cart nav-icon-fa"></i>Keranjang
                     <span class="nav-badge" id="cart-badge">0</span>
                 </div>
+                <div class="nav-item" id="nav-orders" onclick="navigate('orders')">
+                    <i class="fas fa-receipt nav-icon-fa"></i>Riwayat Pesanan
+                </div>
             </nav>
             <div class="sidebar-logout" onclick="doLogout()">
                 <i class="fas fa-sign-out-alt logout-icon-fa"></i>Logout
@@ -220,6 +223,12 @@
                         <button class="pay-btn" onclick="startPayment()">Bayar</button>
                     </div>
                 </div>
+            </div>
+
+            <!-- ORDERS -->
+            <div id="view-orders" class="view">
+                <h2 class="section-title">Riwayat Pesanan</h2>
+                <div id="orders-list"></div>
             </div>
 
             <!-- COMPARE PRICE -->
