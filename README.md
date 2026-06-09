@@ -2,6 +2,6 @@
 
 Website yang belum terealisasikan
 
-- ADMIN PANEL (masi dikit maseh -frontend tercinta)
+- ADMIN PANEL (masi dikit maseh -fullstack tercinta)
 - FILTER
 - SHOW BY
