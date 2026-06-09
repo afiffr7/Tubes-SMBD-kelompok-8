@@ -448,5 +448,3 @@ Winmilk	Smoothies	12000	Cheesecake</pre>
     <script src="js/app.js"></script>
 </body>
 </html>
-
-
