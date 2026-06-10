@@ -684,7 +684,6 @@ function parseBulkImportText() {
             let product = '';
             let price = 0;
             let variant = '';
-
             // Jika kolom pertama adalah nomor urut angka
             if (!isNaN(col1) && parts.length >= 4) {
                 store = parts[1].trim();

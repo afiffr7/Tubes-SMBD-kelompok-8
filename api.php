@@ -503,7 +503,6 @@ if ($action == 'get_orders') {
     $query = "SELECT * FROM orders WHERE user_id = $user_id ORDER BY created_at DESC";
     $orders_q = mysqli_query($conn, $query);
     $orders = mysqli_fetch_all($orders_q, MYSQLI_ASSOC);
-    
     foreach ($orders as &$o) {
         $oid = $o['id'];
         $items_q = mysqli_query($conn, "SELECT * FROM order_items WHERE order_id = $oid");
