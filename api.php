@@ -97,13 +97,48 @@ if ($action == 'logout') {
 }
 
 if ($action == 'get_data') {
-    $mitras = mysqli_fetch_all(mysqli_query($conn, "SELECT * FROM mitras"), MYSQLI_ASSOC);
-    $stores = mysqli_fetch_all(mysqli_query($conn, "SELECT * FROM stores"), MYSQLI_ASSOC);
-    $foods_raw = mysqli_fetch_all(mysqli_query($conn, "SELECT * FROM foods"), MYSQLI_ASSOC);
+    // Ambil mitra dari tabel baru
+    $mitras_raw = mysqli_fetch_all(mysqli_query($conn, "SELECT id_mitra, nama_mitra FROM mitra"), MYSQLI_ASSOC);
+    $mitras = [];
+    foreach ($mitras_raw as $m) {
+        $mitras[] = ['id' => $m['id_mitra'], 'name' => $m['nama_mitra']];
+    }
+
+    // Ambil toko (umkm) - map ke format lama
+    $stores_raw = mysqli_fetch_all(mysqli_query($conn, "SELECT * FROM umkm"), MYSQLI_ASSOC);
+    $stores = [];
+    foreach ($stores_raw as $s) {
+        // Cari mitra_id dari mitra_umkm (ambil yang pertama saja)
+        $mu = mysqli_query($conn, "SELECT id_mitra FROM mitra_umkm WHERE id_umkm = " . (int)$s['id_umkm'] . " LIMIT 1");
+        $mitra_id = null;
+        if ($mu && mysqli_num_rows($mu) > 0) {
+            $mrow = mysqli_fetch_assoc($mu);
+            $mitra_id = $mrow['id_mitra'];
+        }
+        $stores[] = [
+            'id' => $s['id_umkm'],
+            'name' => $s['nama_umkm'],
+            'mitra_id' => $mitra_id,
+            'icon' => $s['foto'] ? '🏪' : '🏪',
+            'info' => $s['alamat'] ?? ''
+        ];
+    }
+
+    // Ambil produk + join jenis untuk nama jenis
+    $foods_raw = mysqli_fetch_all(mysqli_query($conn, "
+        SELECT p.id_produk, p.id_umkm, p.nama_produk, p.harga, j.nama_jenis 
+        FROM produk p 
+        LEFT JOIN jenis j ON p.id_jenis = j.id_jenis
+    "), MYSQLI_ASSOC);
 
     $foods = [];
     foreach ($foods_raw as $f) {
-        $foods[$f['store_id']][] = $f;
+        $foods[$f['id_umkm']][] = [
+            'id' => (int)$f['id_produk'],
+            'name' => $f['nama_produk'],
+            'price' => (int)$f['harga'],
+            'jenis' => $f['nama_jenis'] ?? 'Makanan'
+        ];
     }
 
     echo json_encode([
@@ -113,15 +148,14 @@ if ($action == 'get_data') {
     ]);
 }
 
-// ===== CRUD STORES (Admin Only) =====
+// ===== CRUD STORES (Admin Only) - mapped to umkm =====
 
 if ($action == 'add_store') {
     requireAdmin();
 
     $data = json_decode(file_get_contents('php://input'), true);
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
-    $mitra_id = mysqli_real_escape_string($conn, $data['mitra_id'] ?? '');
-    $icon = mysqli_real_escape_string($conn, $data['icon'] ?? '🏪');
+    $mitra_id = isset($data['mitra_id']) ? (int)$data['mitra_id'] : 0;
     $info = mysqli_real_escape_string($conn, $data['info'] ?? '');
 
     if (empty($name)) {
@@ -129,9 +163,13 @@ if ($action == 'add_store') {
         exit;
     }
 
-    $query = "INSERT INTO stores (name, mitra_id, icon, info) VALUES ('$name', " . ($mitra_id ? "'$mitra_id'" : "NULL") . ", '$icon', '$info')";
+    $query = "INSERT INTO umkm (nama_umkm, alamat) VALUES ('$name', '$info')";
     if (mysqli_query($conn, $query)) {
         $newId = mysqli_insert_id($conn);
+        // Link mitra if provided
+        if ($mitra_id > 0) {
+            mysqli_query($conn, "INSERT INTO mitra_umkm (id_umkm, id_mitra) VALUES ($newId, $mitra_id)");
+        }
         echo json_encode(['success' => true, 'id' => $newId, 'message' => 'Toko berhasil ditambahkan.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Gagal menambah toko: ' . mysqli_error($conn)]);
@@ -144,8 +182,7 @@ if ($action == 'update_store') {
     $data = json_decode(file_get_contents('php://input'), true);
     $id = (int)($data['id'] ?? 0);
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
-    $mitra_id = mysqli_real_escape_string($conn, $data['mitra_id'] ?? '');
-    $icon = mysqli_real_escape_string($conn, $data['icon'] ?? '🏪');
+    $mitra_id = isset($data['mitra_id']) ? (int)$data['mitra_id'] : 0;
     $info = mysqli_real_escape_string($conn, $data['info'] ?? '');
 
     if ($id <= 0 || empty($name)) {
@@ -153,7 +190,7 @@ if ($action == 'update_store') {
         exit;
     }
 
-    $query = "UPDATE stores SET name='$name', mitra_id=" . ($mitra_id ? "'$mitra_id'" : "NULL") . ", icon='$icon', info='$info' WHERE id=$id";
+    $query = "UPDATE umkm SET nama_umkm='$name', alamat='$info' WHERE id_umkm=$id";
     if (mysqli_query($conn, $query)) {
         echo json_encode(['success' => true, 'message' => 'Toko berhasil diupdate.']);
     } else {
@@ -172,17 +209,19 @@ if ($action == 'delete_store') {
         exit;
     }
 
-    // Hapus semua makanan toko ini dulu (cascade manual)
-    mysqli_query($conn, "DELETE FROM foods WHERE store_id = $id");
+    // Hapus produk, mitra_umkm, pembayaran_umkm dulu
+    mysqli_query($conn, "DELETE FROM produk WHERE id_umkm = $id");
+    mysqli_query($conn, "DELETE FROM mitra_umkm WHERE id_umkm = $id");
+    mysqli_query($conn, "DELETE FROM pembayaran_umkm WHERE id_umkm = $id");
     
-    if (mysqli_query($conn, "DELETE FROM stores WHERE id = $id")) {
+    if (mysqli_query($conn, "DELETE FROM umkm WHERE id_umkm = $id")) {
         echo json_encode(['success' => true, 'message' => 'Toko dan semua menunya berhasil dihapus.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Gagal menghapus toko: ' . mysqli_error($conn)]);
     }
 }
 
-// ===== CRUD FOODS (Admin Only) =====
+// ===== CRUD FOODS (Admin Only) - mapped to produk =====
 
 if ($action == 'add_food') {
     requireAdmin();
@@ -191,13 +230,22 @@ if ($action == 'add_food') {
     $store_id = (int)($data['store_id'] ?? 0);
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
     $price = (int)($data['price'] ?? 0);
+    $jenis = mysqli_real_escape_string($conn, $data['jenis'] ?? 'Makanan');
 
     if ($store_id <= 0 || empty($name) || $price <= 0) {
         echo json_encode(['success' => false, 'message' => 'Store ID, nama, dan harga wajib diisi.']);
         exit;
     }
 
-    $query = "INSERT INTO foods (store_id, name, price) VALUES ($store_id, '$name', $price)";
+    // Map jenis string to id_jenis
+    $id_jenis = 1; // Default: Makanan
+    if ($jenis == 'Minuman') $id_jenis = 2;
+    else if ($jenis == 'Topping') $id_jenis = 3;
+
+    // Default varian = Netral (6)
+    $id_varian = 6;
+
+    $query = "INSERT INTO produk (id_umkm, nama_produk, id_jenis, harga, id_varian) VALUES ($store_id, '$name', $id_jenis, $price, $id_varian)";
     if (mysqli_query($conn, $query)) {
         $newId = mysqli_insert_id($conn);
         echo json_encode(['success' => true, 'id' => $newId, 'message' => 'Menu berhasil ditambahkan.']);
@@ -213,13 +261,19 @@ if ($action == 'update_food') {
     $id = (int)($data['id'] ?? 0);
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
     $price = (int)($data['price'] ?? 0);
+    $jenis = mysqli_real_escape_string($conn, $data['jenis'] ?? 'Makanan');
 
     if ($id <= 0 || empty($name) || $price <= 0) {
         echo json_encode(['success' => false, 'message' => 'ID, nama, dan harga wajib diisi.']);
         exit;
     }
 
-    $query = "UPDATE foods SET name='$name', price=$price WHERE id=$id";
+    // Map jenis string to id_jenis
+    $id_jenis = 1;
+    if ($jenis == 'Minuman') $id_jenis = 2;
+    else if ($jenis == 'Topping') $id_jenis = 3;
+
+    $query = "UPDATE produk SET nama_produk='$name', harga=$price, id_jenis=$id_jenis WHERE id_produk=$id";
     if (mysqli_query($conn, $query)) {
         echo json_encode(['success' => true, 'message' => 'Menu berhasil diupdate.']);
     } else {
@@ -238,37 +292,30 @@ if ($action == 'delete_food') {
         exit;
     }
 
-    if (mysqli_query($conn, "DELETE FROM foods WHERE id = $id")) {
+    if (mysqli_query($conn, "DELETE FROM produk WHERE id_produk = $id")) {
         echo json_encode(['success' => true, 'message' => 'Menu berhasil dihapus.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Gagal menghapus menu: ' . mysqli_error($conn)]);
     }
 }
 
-// ===== CRUD MITRAS (Admin Only) =====
+// ===== CRUD MITRAS (Admin Only) - mapped to mitra =====
 
 if ($action == 'add_mitra') {
     requireAdmin();
 
     $data = json_decode(file_get_contents('php://input'), true);
-    $id = mysqli_real_escape_string($conn, $data['id'] ?? '');
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
 
-    if (empty($id) || empty($name)) {
-        echo json_encode(['success' => false, 'message' => 'ID dan nama mitra wajib diisi.']);
+    if (empty($name)) {
+        echo json_encode(['success' => false, 'message' => 'Nama mitra wajib diisi.']);
         exit;
     }
 
-    // Cek duplikat
-    $check = mysqli_query($conn, "SELECT id FROM mitras WHERE id = '$id'");
-    if (mysqli_num_rows($check) > 0) {
-        echo json_encode(['success' => false, 'message' => 'ID mitra sudah ada.']);
-        exit;
-    }
-
-    $query = "INSERT INTO mitras (id, name) VALUES ('$id', '$name')";
+    $query = "INSERT INTO mitra (nama_mitra) VALUES ('$name')";
     if (mysqli_query($conn, $query)) {
-        echo json_encode(['success' => true, 'message' => 'Mitra berhasil ditambahkan.']);
+        $newId = mysqli_insert_id($conn);
+        echo json_encode(['success' => true, 'id' => $newId, 'message' => 'Mitra berhasil ditambahkan.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Gagal menambah mitra: ' . mysqli_error($conn)]);
     }
@@ -278,15 +325,15 @@ if ($action == 'update_mitra') {
     requireAdmin();
 
     $data = json_decode(file_get_contents('php://input'), true);
-    $id = mysqli_real_escape_string($conn, $data['id'] ?? '');
+    $id = (int)($data['id'] ?? 0);
     $name = mysqli_real_escape_string($conn, $data['name'] ?? '');
 
-    if (empty($id) || empty($name)) {
+    if ($id <= 0 || empty($name)) {
         echo json_encode(['success' => false, 'message' => 'ID dan nama mitra wajib diisi.']);
         exit;
     }
 
-    $query = "UPDATE mitras SET name='$name' WHERE id='$id'";
+    $query = "UPDATE mitra SET nama_mitra='$name' WHERE id_mitra=$id";
     if (mysqli_query($conn, $query)) {
         echo json_encode(['success' => true, 'message' => 'Mitra berhasil diupdate.']);
     } else {
@@ -298,22 +345,22 @@ if ($action == 'delete_mitra') {
     requireAdmin();
 
     $data = json_decode(file_get_contents('php://input'), true);
-    $id = mysqli_real_escape_string($conn, $data['id'] ?? '');
+    $id = (int)($data['id'] ?? 0);
 
-    if (empty($id)) {
+    if ($id <= 0) {
         echo json_encode(['success' => false, 'message' => 'ID mitra tidak valid.']);
         exit;
     }
 
-    // Cek apakah ada toko yang masih pakai mitra ini
-    $check = mysqli_query($conn, "SELECT COUNT(*) as cnt FROM stores WHERE mitra_id = '$id'");
+    // Cek apakah ada umkm yang masih pakai mitra ini
+    $check = mysqli_query($conn, "SELECT COUNT(*) as cnt FROM mitra_umkm WHERE id_mitra = $id");
     $row = mysqli_fetch_assoc($check);
     if ($row['cnt'] > 0) {
         echo json_encode(['success' => false, 'message' => 'Tidak bisa hapus mitra. Masih ada ' . $row['cnt'] . ' toko yang bermitra. Hapus toko-toko tersebut terlebih dahulu.']);
         exit;
     }
 
-    if (mysqli_query($conn, "DELETE FROM mitras WHERE id = '$id'")) {
+    if (mysqli_query($conn, "DELETE FROM mitra WHERE id_mitra = $id")) {
         echo json_encode(['success' => true, 'message' => 'Mitra berhasil dihapus.']);
     } else {
         echo json_encode(['success' => false, 'message' => 'Gagal menghapus mitra: ' . mysqli_error($conn)]);
@@ -341,30 +388,37 @@ if ($action == 'bulk_add_foods') {
             $product_name = mysqli_real_escape_string($conn, $item['product']);
             $price = (int)$item['price'];
             $variant = mysqli_real_escape_string($conn, $item['variant']);
+            $jenis = mysqli_real_escape_string($conn, $item['jenis'] ?? 'Makanan');
             
-            // Cari atau buat toko
-            $store_res = mysqli_query($conn, "SELECT id FROM stores WHERE name = '$store_name'");
+            // Map jenis to id_jenis
+            $id_jenis = 1;
+            if ($jenis == 'Minuman') $id_jenis = 2;
+            else if ($jenis == 'Topping') $id_jenis = 3;
+            
+            // Cari atau buat toko (umkm)
+            $store_res = mysqli_query($conn, "SELECT id_umkm FROM umkm WHERE nama_umkm = '$store_name'");
             if (mysqli_num_rows($store_res) > 0) {
                 $store = mysqli_fetch_assoc($store_res);
-                $store_id = $store['id'];
+                $store_id = $store['id_umkm'];
             } else {
-                // Auto-buat toko dengan icon 🥛
-                $icon = '🥛';
-                mysqli_query($conn, "INSERT INTO stores (name, icon, info) VALUES ('$store_name', '$icon', 'Toko hasil import')");
+                mysqli_query($conn, "INSERT INTO umkm (nama_umkm, alamat) VALUES ('$store_name', 'Toko hasil import')");
                 $store_id = mysqli_insert_id($conn);
                 $imported_stores++;
             }
             
-            // Susun nama makanan: "Nama Produk - Varian rasa" jika berbeda
+            // Susun nama makanan
             $food_name = $product_name;
             if (strcasecmp($product_name, $variant) !== 0) {
                 $food_name = $product_name . ' - ' . $variant;
             }
             
-            // Cek duplikat menu di toko tersebut
-            $food_check = mysqli_query($conn, "SELECT id FROM foods WHERE store_id = $store_id AND name = '$food_name'");
+            // Default varian = Netral (6)
+            $id_varian = 6;
+            
+            // Cek duplikat
+            $food_check = mysqli_query($conn, "SELECT id_produk FROM produk WHERE id_umkm = $store_id AND nama_produk = '$food_name'");
             if (mysqli_num_rows($food_check) == 0) {
-                mysqli_query($conn, "INSERT INTO foods (store_id, name, price) VALUES ($store_id, '$food_name', $price)");
+                mysqli_query($conn, "INSERT INTO produk (id_umkm, nama_produk, id_jenis, harga, id_varian) VALUES ($store_id, '$food_name', $id_jenis, $price, $id_varian)");
                 $imported_foods++;
             }
         }
@@ -385,7 +439,6 @@ if ($action == 'checkout') {
     requireLogin();
 
     $data = json_decode(file_get_contents('php://input'), true);
-    // FIX #1: Ambil user_id dari session, BUKAN dari client
     $user_id = (int)$_SESSION['user_id'];
     $items = $data['items'] ?? [];
 
@@ -394,7 +447,6 @@ if ($action == 'checkout') {
         exit;
     }
 
-    // FIX #2: Hitung total_price di SERVER dari database, BUKAN dari client
     $total_price = 0;
     $validated_items = [];
 
@@ -407,16 +459,16 @@ if ($action == 'checkout') {
             exit;
         }
 
-        // Query harga langsung dari database
-        $food_query = mysqli_query($conn, "SELECT id, name, price FROM foods WHERE id = $food_id");
+        // Query harga dari tabel produk
+        $food_query = mysqli_query($conn, "SELECT id_produk, nama_produk, harga FROM produk WHERE id_produk = $food_id");
         if (mysqli_num_rows($food_query) == 0) {
             echo json_encode(['success' => false, 'message' => "Menu dengan ID $food_id tidak ditemukan."]);
             exit;
         }
 
         $food_row = mysqli_fetch_assoc($food_query);
-        $server_price = (int)$food_row['price'];
-        $server_name = $food_row['name'];
+        $server_price = (int)$food_row['harga'];
+        $server_name = $food_row['nama_produk'];
 
         $validated_items[] = [
             'food_id' => $food_id,
@@ -428,7 +480,6 @@ if ($action == 'checkout') {
         $total_price += $server_price * $qty;
     }
 
-    // Insert order dengan harga yang dihitung server
     if (mysqli_query($conn, "INSERT INTO orders (user_id, total_price) VALUES ($user_id, $total_price)")) {
         $order_id = mysqli_insert_id($conn);
         foreach ($validated_items as $vi) {
@@ -447,7 +498,6 @@ if ($action == 'checkout') {
 if ($action == 'get_orders') {
     requireLogin();
 
-    // FIX #3: Ambil user_id dari session, BUKAN dari $_GET (IDOR fix)
     $user_id = (int)$_SESSION['user_id'];
 
     $query = "SELECT * FROM orders WHERE user_id = $user_id ORDER BY created_at DESC";

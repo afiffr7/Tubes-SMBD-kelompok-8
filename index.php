@@ -369,6 +369,14 @@ Winmilk	Smoothies	12000	Cheesecake</pre>
                 <label class="crud-form-label">Harga (Rp)</label>
                 <input type="number" class="crud-form-input" id="food-price" placeholder="25000" min="1">
             </div>
+            <div class="crud-form-group">
+                <label class="crud-form-label">Jenis</label>
+                <select class="crud-form-select" id="food-jenis">
+                    <option value="Makanan">Makanan</option>
+                    <option value="Minuman">Minuman</option>
+                    <option value="Topping">Topping</option>
+                </select>
+            </div>
             <div class="crud-btn-group">
                 <button class="crud-btn crud-btn-cancel" onclick="closeCrudModal('modal-food')">Batal</button>
                 <button class="crud-btn crud-btn-save" onclick="saveFood()">Simpan</button>
@@ -394,6 +402,7 @@ Winmilk	Smoothies	12000	Cheesecake</pre>
                 <button class="crud-btn crud-btn-cancel" onclick="closeCrudModal('modal-mitra')">Batal</button>
                 <button class="crud-btn crud-btn-save" onclick="saveMitra()">Simpan</button>
             </div>
+            
         </div>
     </div>
 
@@ -417,20 +426,46 @@ Winmilk	Smoothies	12000	Cheesecake</pre>
     <script>
         /* data fetch */
         <?php
-        $mitras_q = mysqli_query($conn, "SELECT * FROM mitras");
-        $stores_q = mysqli_query($conn, "SELECT * FROM stores");
-        $foods_q = mysqli_query($conn, "SELECT * FROM foods");
+        // Ambil mitra dari tabel baru
+        $mitras_raw = mysqli_fetch_all(mysqli_query($conn, "SELECT id_mitra, nama_mitra FROM mitra"), MYSQLI_ASSOC);
+        $mitras = [];
+        foreach ($mitras_raw as $m) {
+            $mitras[] = ['id' => (string)$m['id_mitra'], 'name' => $m['nama_mitra']];
+        }
 
-        $mitras = mysqli_fetch_all($mitras_q, MYSQLI_ASSOC);
-        $stores = mysqli_fetch_all($stores_q, MYSQLI_ASSOC);
-        $foods_raw = mysqli_fetch_all($foods_q, MYSQLI_ASSOC);
+        // Ambil umkm - map ke format stores
+        $stores_raw = mysqli_fetch_all(mysqli_query($conn, "SELECT * FROM umkm"), MYSQLI_ASSOC);
+        $stores = [];
+        foreach ($stores_raw as $s) {
+            $mu = mysqli_query($conn, "SELECT id_mitra FROM mitra_umkm WHERE id_umkm = " . (int)$s['id_umkm'] . " LIMIT 1");
+            $mitra_id = null;
+            if ($mu && mysqli_num_rows($mu) > 0) {
+                $mrow = mysqli_fetch_assoc($mu);
+                $mitra_id = (string)$mrow['id_mitra'];
+            }
+            $stores[] = [
+                'id' => (int)$s['id_umkm'],
+                'name' => $s['nama_umkm'],
+                'mitra_id' => $mitra_id,
+                'icon' => '🏪',
+                'info' => $s['alamat'] ?? ''
+            ];
+        }
+
+        // Ambil produk + join jenis
+        $foods_raw = mysqli_fetch_all(mysqli_query($conn, "
+            SELECT p.id_produk, p.id_umkm, p.nama_produk, p.harga, j.nama_jenis 
+            FROM produk p 
+            LEFT JOIN jenis j ON p.id_jenis = j.id_jenis
+        "), MYSQLI_ASSOC);
 
         $foods = [];
         foreach ($foods_raw as $f) {
-            $foods[$f['store_id']][] = [
-                'id' => (int)$f['id'],
-                'name' => $f['name'],
-                'price' => (int)$f['price']
+            $foods[$f['id_umkm']][] = [
+                'id' => (int)$f['id_produk'],
+                'name' => $f['nama_produk'],
+                'price' => (int)$f['harga'],
+                'jenis' => $f['nama_jenis'] ?? 'Makanan'
             ];
         }
         ?>

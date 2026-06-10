@@ -2,7 +2,7 @@
 $host = "localhost"; // Jika MySQL di port standar 3306, tetap localhost.
 $user = "root";
 $pass = "";
-$db   = "db_pemesanan_makanan";
+$db   = "db_tubes";
 
 $conn = mysqli_connect($host, $user, $pass, $db);
 
