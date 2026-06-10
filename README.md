@@ -7,3 +7,7 @@ Website yang belum terealisasikan
 - fitur baru bulk import buat masukin data via tabel dari excel bisa tinggal ctrl + c, ctrl + v
 - FILTER
 - SHOW BY
+
+Error
+- Register
+- Login ( bisa kalo udah punya akunya doang )
