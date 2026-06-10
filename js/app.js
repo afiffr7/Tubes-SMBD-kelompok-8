@@ -123,6 +123,7 @@ async function saveStore() {
             if (currentView === 'dashboard') renderDashboard();
             else if (currentView === 'list-toko') renderListToko();
             else if (currentView === 'toko-mitra' && currentMitra) renderTokoMitra(currentMitra);
+            else if (currentView === 'data-umkm') loadDataTable('umkm');
         } else {
             showToast(data.message, 'error');
         }
@@ -192,7 +193,8 @@ async function saveFood() {
             showToast(data.message);
             closeCrudModal('modal-food');
             await refreshData();
-            renderCatalog(currentStoreId);
+            if (currentView === 'data-produk') loadDataTable('produk');
+            else renderCatalog(currentStoreId);
         } else {
             showToast(data.message, 'error');
         }
@@ -255,7 +257,8 @@ async function saveMitra() {
             showToast(data.message);
             closeCrudModal('modal-mitra');
             await refreshData();
-            renderMitra();
+            if (currentView === 'data-mitra') loadDataTable('mitra');
+            else renderMitra();
         } else {
             showToast(data.message, 'error');
         }
@@ -306,10 +309,13 @@ async function confirmDelete() {
                 if (currentView === 'dashboard') renderDashboard();
                 else if (currentView === 'list-toko') renderListToko();
                 else if (currentView === 'toko-mitra' && currentMitra) renderTokoMitra(currentMitra);
+                else if (currentView === 'data-umkm') loadDataTable('umkm');
             } else if (type === 'food') {
-                renderCatalog(currentStoreId);
+                if (currentView === 'data-produk') loadDataTable('produk');
+                else renderCatalog(currentStoreId);
             } else if (type === 'mitra') {
-                renderMitra();
+                if (currentView === 'data-mitra') loadDataTable('mitra');
+                else renderMitra();
             }
         } else {
             showToast(data.message, 'error');
@@ -404,15 +410,19 @@ function enterApp(user) {
     document.getElementById('sidebar-avatar').textContent = initials;
     document.getElementById('sidebar-username').textContent = user.username || user.name;
 
+    // Set role badge
+    const roleEl = document.getElementById('sidebar-role');
+    roleEl.textContent = user.role === 'admin' ? '🛡️ Admin' : '👤 User';
+
     // Set role class on body
     document.body.classList.remove('role-admin', 'role-user');
     if (user.role === 'admin') {
         document.body.classList.add('role-admin');
+        navigate('admin-dashboard');
     } else {
         document.body.classList.add('role-user');
+        navigate('dashboard');
     }
-
-    navigate('dashboard');
 }
 
 async function doLogout() {
@@ -448,6 +458,10 @@ function navigate(view, data) {
     // hl dashboard
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
     const navMap = {
+        'admin-dashboard': 'nav-admin-dashboard',
+        'data-produk': 'nav-data-produk',
+        'data-umkm': 'nav-data-umkm',
+        'data-mitra': 'nav-data-mitra',
         'dashboard': 'nav-dashboard',
         'mitra': 'nav-mitra',
         'list-toko': 'nav-list-toko',
@@ -466,6 +480,10 @@ function navigate(view, data) {
     document.getElementById('view-' + view).classList.add('active');
 
     // Render content
+    if (view === 'admin-dashboard') renderAdminDashboard();
+    if (view === 'data-produk') loadDataTable('produk');
+    if (view === 'data-umkm') loadDataTable('umkm');
+    if (view === 'data-mitra') loadDataTable('mitra');
     if (view === 'dashboard') renderDashboard();
     if (view === 'list-toko') renderListToko();
     if (view === 'mitra') renderMitra();
@@ -864,8 +882,8 @@ function renderTokoMitra(data) {
     document.getElementById('toko-mitra-grid').innerHTML = list.map(s => `
                 <div class="toko-card" onclick="navigate('catalog', ${s.id})">
                     <div class="card-actions" onclick="event.stopPropagation()">
-                        <button class="card-action-btn edit-btn" onclick="openStoreModal(${s.id})" title="Edit"><i class="fas fa-pen"></i></button>
-                        <button class="card-action-btn delete-btn" onclick="openDeleteModal('store', ${s.id}, '${escAttr(s.name)}')" title="Hapus"><i class="fas fa-trash"></i></button>
+                        <button class="card-action-btn edit-btn" aria-label="Edit Toko" onclick="openStoreModal(${s.id})" title="Edit"><i class="fas fa-pen" aria-hidden="true"></i></button>
+                        <button class="card-action-btn delete-btn" aria-label="Hapus Toko" onclick="openDeleteModal('store', ${s.id}, '${escAttr(s.name)}')" title="Hapus"><i class="fas fa-trash" aria-hidden="true"></i></button>
                     </div>
                     <div class="toko-card-icon">${escHTML(s.icon)}</div>
                     <div class="toko-card-name">${escHTML(s.name)}</div>
@@ -874,28 +892,63 @@ function renderTokoMitra(data) {
             `).join('');
 }
 
-function renderCatalog(storeId) {
+let currentCatalogCategory = 'All';
+
+function filterCatalog(category) {
+    currentCatalogCategory = category;
+    
+    // Update active chip
+    const chips = document.querySelectorAll('#catalog-filter-chips .compare-chip');
+    chips.forEach(chip => {
+        if (chip.textContent.trim() === category || (category === 'All' && chip.textContent.trim() === 'Semua')) {
+            chip.classList.add('active');
+            chip.setAttribute('aria-pressed', 'true');
+        } else {
+            chip.classList.remove('active');
+            chip.setAttribute('aria-pressed', 'false');
+        }
+    });
+
+    renderCatalog(currentStoreId, category);
+}
+
+function renderCatalog(storeId, category = currentCatalogCategory) {
     if (storeId) currentStoreId = storeId;
     const store = stores.find(s => s.id === currentStoreId);
     if (!store) return;
+    
     document.getElementById('catalog-store-title').textContent = store.name;
     document.getElementById('catalog-store-sub').textContent = store.info;
-    document.getElementById('food-grid').innerHTML = (foods[currentStoreId] || []).map(f => {
-        let jenisColor = '#e0e0e0'; let jenisTextColor = '#333';
-        if (f.jenis === 'Minuman') { jenisColor = '#4fc3f7'; jenisTextColor = '#fff'; }
-        else if (f.jenis === 'Topping') { jenisColor = '#ffb74d'; jenisTextColor = '#fff'; }
-        else { jenisColor = '#81c784'; jenisTextColor = '#fff'; }
-        return `
-        <div class="food-card">
-            <div class="card-actions">
-                <button class="card-action-btn edit-btn" onclick="openFoodModal(${f.id})" title="Edit"><i class="fas fa-pen"></i></button>
-                <button class="card-action-btn delete-btn" onclick="openDeleteModal('food', ${f.id}, '${escAttr(f.name)}')" title="Hapus"><i class="fas fa-trash"></i></button>
+    
+    let storeFoods = foods[currentStoreId] || [];
+    
+    if (category !== 'All') {
+        storeFoods = storeFoods.filter(f => f.jenis === category);
+    }
+
+    const emptyState = document.getElementById('catalog-empty');
+    if (storeFoods.length === 0) {
+        emptyState.style.display = 'flex';
+        document.getElementById('food-grid').innerHTML = '';
+    } else {
+        emptyState.style.display = 'none';
+        document.getElementById('food-grid').innerHTML = storeFoods.map(f => {
+            let jenisColor = '#e0e0e0'; let jenisTextColor = '#333';
+            if (f.jenis === 'Minuman') { jenisColor = '#4fc3f7'; jenisTextColor = '#fff'; }
+            else if (f.jenis === 'Topping') { jenisColor = '#ffb74d'; jenisTextColor = '#fff'; }
+            else { jenisColor = '#81c784'; jenisTextColor = '#fff'; }
+            return `
+            <div class="food-card">
+                <div class="card-actions">
+                    <button class="card-action-btn edit-btn" aria-label="Edit Menu" onclick="openFoodModal(${f.id})" title="Edit"><i class="fas fa-pen" aria-hidden="true"></i></button>
+                    <button class="card-action-btn delete-btn" aria-label="Hapus Menu" onclick="openDeleteModal('food', ${f.id}, '${escAttr(f.name)}')" title="Hapus"><i class="fas fa-trash" aria-hidden="true"></i></button>
+                </div>
+                <div class="food-name">${escHTML(f.name)}</div>
+                <div class="food-price">${fmt(f.price)} <span style="font-size: 0.8em; background: ${jenisColor}; color: ${jenisTextColor}; padding: 2px 8px; border-radius: 4px; margin-left: 5px;">${escHTML(f.jenis || 'Makanan')}</span></div>
+                <button class="add-btn" aria-label="Tambah ${escAttr(f.name)} ke Keranjang" onclick="addToCart(${f.id}, '${escAttr(f.name)}', ${f.price})">Tambah ke Keranjang</button>
             </div>
-            <div class="food-name">${escHTML(f.name)}</div>
-            <div class="food-price">${fmt(f.price)} <span style="font-size: 0.8em; background: ${jenisColor}; color: ${jenisTextColor}; padding: 2px 8px; border-radius: 4px; margin-left: 5px;">${escHTML(f.jenis || 'Makanan')}</span></div>
-            <button class="add-btn" onclick="addToCart(${f.id}, '${escAttr(f.name)}', ${f.price})">Tambah ke Keranjang</button>
-        </div>
-    `}).join('');
+        `}).join('');
+    }
 }
 
 // kantong belanja 
@@ -1023,3 +1076,289 @@ function finishPayment() {
 }
 
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+// ===== ADMIN DASHBOARD & DATA TABLES =====
+
+let dtState = {
+    produk: { page: 1, perPage: 10, search: '', sort: 'id_produk', sortDir: 'ASC' },
+    umkm: { page: 1, perPage: 10, search: '', sort: 'id_umkm', sortDir: 'ASC' },
+    mitra: { page: 1, perPage: 10, search: '', sort: 'id_mitra', sortDir: 'ASC' }
+};
+
+async function renderAdminDashboard() {
+    try {
+        const res = await fetch('api.php?action=get_stats');
+        const data = await res.json();
+        if (!data.success) {
+            showToast(data.message || 'Gagal memuat statistik', 'error');
+            return;
+        }
+
+        // Fill stats cards
+        document.getElementById('stat-produk').textContent = data.stats.total_produk;
+        document.getElementById('stat-umkm').textContent = data.stats.total_umkm;
+        document.getElementById('stat-mitra').textContent = data.stats.total_mitra;
+        document.getElementById('stat-orders').textContent = data.stats.total_orders;
+
+        // Render Bar Chart: Produk per UMKM (Top 10)
+        const chartContainer = document.getElementById('admin-chart');
+        if (chartContainer && data.chart_produk_per_umkm) {
+            const maxVal = Math.max(...data.chart_produk_per_umkm.map(d => parseInt(d.jumlah)), 1);
+            chartContainer.innerHTML = data.chart_produk_per_umkm.map(d => {
+                const percent = (parseInt(d.jumlah) / maxVal) * 100;
+                return `
+                    <div class="chart-bar-wrap">
+                        <div class="chart-bar" style="height: ${percent}%">
+                            <span class="chart-bar-value">${d.jumlah}</span>
+                            <span class="chart-bar-label" title="${escHTML(d.nama_umkm)}">${escHTML(d.nama_umkm)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render Horizontal Bar Chart: Produk per Jenis
+        const jenisChartContainer = document.getElementById('admin-jenis-chart');
+        if (jenisChartContainer && data.chart_produk_per_jenis) {
+            const totalProduk = data.stats.total_produk || 1;
+            jenisChartContainer.innerHTML = data.chart_produk_per_jenis.map(d => {
+                const val = parseInt(d.jumlah);
+                const percent = (val / totalProduk) * 100;
+                const typeClass = (d.nama_jenis || '').toLowerCase();
+                return `
+                    <div class="jenis-bar-row">
+                        <div class="jenis-bar-label">${escHTML(d.nama_jenis || 'Makanan')}</div>
+                        <div class="jenis-bar-track">
+                            <div class="jenis-bar-fill ${typeClass}" style="width: ${percent}%">
+                                ${val} (${percent.toFixed(1)}%)
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    } catch (e) {
+        console.error('Gagal render admin dashboard:', e);
+        showToast('Gagal memuat statistik dashboard.', 'error');
+    }
+}
+
+async function loadDataTable(tableName) {
+    const state = dtState[tableName];
+    if (!state) return;
+
+    try {
+        const url = `api.php?action=get_table_data&table=${tableName}&page=${state.page}&per_page=${state.perPage}&search=${encodeURIComponent(state.search)}&sort=${state.sort}&sort_dir=${state.sortDir}`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (data.success) {
+            renderDataTable(tableName, data);
+        } else {
+            showToast(data.message || 'Gagal memuat data tabel', 'error');
+        }
+    } catch (e) {
+        console.error('Gagal memuat tabel:', e);
+        showToast('Gagal memuat data tabel.', 'error');
+    }
+}
+
+function renderDataTable(tableName, data) {
+    const state = dtState[tableName];
+    const tableEl = document.getElementById(`dt-table-${tableName}`);
+    if (!tableEl) return;
+
+    const thead = tableEl.querySelector('thead tr');
+    const tbody = tableEl.querySelector('tbody');
+    
+    // Mapping columns to readable names
+    const colLabels = {
+        id_produk: 'ID',
+        nama_produk: 'Nama Produk',
+        nama_jenis: 'Jenis',
+        harga: 'Harga',
+        nama_umkm: 'UMKM',
+        id_umkm: 'ID',
+        nama_umkm_direct: 'Nama UMKM',
+        alamat: 'Alamat',
+        kontak_umkm: 'Kontak',
+        sertifikasi_halal: 'Halal',
+        id_mitra: 'ID',
+        nama_mitra: 'Nama Mitra',
+        jumlah_umkm: 'Jumlah UMKM'
+    };
+
+    // Render columns in header
+    thead.innerHTML = data.columns.map(col => {
+        const label = colLabels[col] || col;
+        const isSorted = state.sort === col;
+        const sortClass = isSorted ? 'sort-active' : '';
+        const sortIcon = isSorted ? (state.sortDir === 'ASC' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>') : '<i class="fas fa-sort"></i>';
+        
+        return `<th class="${sortClass}" onclick="dtSort('${tableName}', '${col}')">${label} <span class="sort-icon">${sortIcon}</span></th>`;
+    }).join('') + `<th>Aksi</th>`;
+
+    // Render body rows
+    if (data.rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${data.columns.length + 1}" style="text-align: center; padding: 2rem;">Tidak ada data ditemukan</td></tr>`;
+    } else {
+        tbody.innerHTML = data.rows.map(row => {
+            const tdElements = data.columns.map(col => {
+                let cellVal = row[col];
+                if (col === 'harga') {
+                    cellVal = fmt(parseFloat(cellVal));
+                } else if (cellVal === null || cellVal === undefined) {
+                    cellVal = '-';
+                }
+                return `<td>${escHTML(String(cellVal))}</td>`;
+            }).join('');
+
+            // Action buttons
+            let id = '';
+            let name = '';
+            if (tableName === 'produk') {
+                id = row.id_produk;
+                name = row.nama_produk;
+            } else if (tableName === 'umkm') {
+                id = row.id_umkm;
+                name = row.nama_umkm;
+            } else if (tableName === 'mitra') {
+                id = row.id_mitra;
+                name = row.nama_mitra;
+            }
+
+            const actionsTd = `
+                <td>
+                    <button class="dt-action-btn dt-btn-edit" onclick="dtEditRow('${tableName}', ${typeof id === 'string' ? `'${id}'` : id})">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                    <button class="dt-action-btn dt-btn-delete" onclick="dtDeleteRow('${tableName}', ${typeof id === 'string' ? `'${id}'` : id}, '${escAttr(name)}')">
+                        <i class="fas fa-trash"></i> Hapus
+                    </button>
+                </td>
+            `;
+
+            return `<tr>${tdElements}${actionsTd}</tr>`;
+        }).join('');
+    }
+
+    // Render footer pagination
+    const footerEl = document.getElementById(`dt-footer-${tableName}`);
+    if (footerEl) {
+        const fromVal = data.total === 0 ? 0 : (data.page - 1) * data.per_page + 1;
+        const toVal = Math.min(data.page * data.per_page, data.total);
+        
+        // Render pagination buttons
+        let pagHtml = '';
+        
+        // Prev button
+        pagHtml += `<button class="dt-page-btn" ${data.page === 1 ? 'disabled' : ''} onclick="dtGoToPage('${tableName}', ${data.page - 1})">Sebelumnya</button>`;
+        
+        // Simple page numbers with ellipsis
+        const maxVisible = 5;
+        let startPage = Math.max(1, data.page - 2);
+        let endPage = Math.min(data.total_pages, startPage + maxVisible - 1);
+        
+        if (endPage - startPage + 1 < maxVisible) {
+            startPage = Math.max(1, endPage - maxVisible + 1);
+        }
+        
+        if (startPage > 1) {
+            pagHtml += `<button class="dt-page-btn" onclick="dtGoToPage('${tableName}', 1)">1</button>`;
+            if (startPage > 2) pagHtml += `<span class="dt-page-ellipsis">...</span>`;
+        }
+        
+        for (let p = startPage; p <= endPage; p++) {
+            pagHtml += `<button class="dt-page-btn ${p === data.page ? 'active' : ''}" onclick="dtGoToPage('${tableName}', ${p})">${p}</button>`;
+        }
+        
+        if (endPage < data.total_pages) {
+            if (endPage < data.total_pages - 1) pagHtml += `<span class="dt-page-ellipsis">...</span>`;
+            pagHtml += `<button class="dt-page-btn" onclick="dtGoToPage('${tableName}', ${data.total_pages})">${data.total_pages}</button>`;
+        }
+        
+        // Next button
+        pagHtml += `<button class="dt-page-btn" ${data.page === data.total_pages || data.total_pages === 0 ? 'disabled' : ''} onclick="dtGoToPage('${tableName}', ${data.page + 1})">Selanjutnya</button>`;
+
+        footerEl.innerHTML = `
+            <div class="dt-info">Menampilkan ${fromVal} sampai ${toVal} dari ${data.total} entri</div>
+            <div class="dt-pagination">${pagHtml}</div>
+        `;
+    }
+}
+
+function dtSort(tableName, column) {
+    const state = dtState[tableName];
+    if (state.sort === column) {
+        state.sortDir = state.sortDir === 'ASC' ? 'DESC' : 'ASC';
+    } else {
+        state.sort = column;
+        state.sortDir = 'ASC';
+    }
+    loadDataTable(tableName);
+}
+
+function dtGoToPage(tableName, pageNum) {
+    dtState[tableName].page = pageNum;
+    loadDataTable(tableName);
+}
+
+let dtSearchTimeout = null;
+function dtSearch(tableName) {
+    const val = document.getElementById(`dt-${tableName}-search`).value;
+    dtState[tableName].search = val;
+    dtState[tableName].page = 1;
+    clearTimeout(dtSearchTimeout);
+    dtSearchTimeout = setTimeout(() => {
+        loadDataTable(tableName);
+    }, 400);
+}
+
+function dtChangePerPage(tableName) {
+    const val = parseInt(document.getElementById(`dt-${tableName}-perpage`).value);
+    dtState[tableName].perPage = val;
+    dtState[tableName].page = 1;
+    loadDataTable(tableName);
+}
+
+function dtEditRow(tableName, id) {
+    if (tableName === 'produk') {
+        let foundStoreId = null;
+        Object.keys(foods).forEach(storeId => {
+            if (foods[storeId].some(f => f.id === id)) {
+                foundStoreId = parseInt(storeId);
+            }
+        });
+        if (foundStoreId) {
+            currentStoreId = foundStoreId;
+            openFoodModal(id);
+        } else {
+            showToast('Produk tidak ditemukan di cache lokal. Coba refresh.', 'error');
+        }
+    } else if (tableName === 'umkm') {
+        openStoreModal(id);
+    } else if (tableName === 'mitra') {
+        openMitraModal(id);
+    }
+}
+
+function dtDeleteRow(tableName, id, name) {
+    if (tableName === 'produk') {
+        let foundStoreId = null;
+        Object.keys(foods).forEach(storeId => {
+            if (foods[storeId].some(f => f.id === id)) {
+                foundStoreId = parseInt(storeId);
+            }
+        });
+        if (foundStoreId) {
+            currentStoreId = foundStoreId;
+            openDeleteModal('food', id, name);
+        } else {
+            showToast('Produk tidak ditemukan di cache lokal. Coba refresh.', 'error');
+        }
+    } else if (tableName === 'umkm') {
+        openDeleteModal('store', id, name);
+    } else if (tableName === 'mitra') {
+        openDeleteModal('mitra', id, name);
+    }
+}

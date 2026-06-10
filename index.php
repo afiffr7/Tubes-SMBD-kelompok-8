@@ -32,16 +32,16 @@
             <form id="form-login" class="auth-form active" onsubmit="event.preventDefault();">
                 <div class="form-group">
                     <div class="input-wrap">
-                        <span class="input-icon">👤</span>
+                        <span class="input-icon" aria-hidden="true">👤</span>
                         <input id="login-username" class="form-input" type="text" placeholder="Username"
-                            autocomplete="username">
+                            autocomplete="username" aria-label="Username">
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="input-wrap">
-                        <span class="input-icon">🔑</span>
+                        <span class="input-icon" aria-hidden="true">🔑</span>
                         <input id="login-password" class="form-input" type="password" placeholder="Password"
-                            autocomplete="current-password">
+                            autocomplete="current-password" aria-label="Password">
                     </div>
                 </div>
                 <div id="login-error" class="form-error">Username atau password salah.</div>
@@ -52,26 +52,26 @@
             <form id="form-register" class="auth-form" onsubmit="event.preventDefault();" autocomplete="off">
                 <div class="form-group">
                     <div class="input-wrap">
-                        <span class="input-icon">👤</span>
-                        <input id="reg-name" class="form-input" type="text" placeholder="Nama Lengkap">
+                        <span class="input-icon" aria-hidden="true">👤</span>
+                        <input id="reg-name" class="form-input" type="text" placeholder="Nama Lengkap" aria-label="Nama Lengkap">
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="input-wrap">
-                        <span class="input-icon">📌</span>
-                        <input id="reg-username" class="form-input" type="text" placeholder="Username">
+                        <span class="input-icon" aria-hidden="true">📌</span>
+                        <input id="reg-username" class="form-input" type="text" placeholder="Username" aria-label="Username">
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="input-wrap">
-                        <span class="input-icon">🔑</span>
-                        <input id="reg-password" class="form-input" type="password" placeholder="Password">
+                        <span class="input-icon" aria-hidden="true">🔑</span>
+                        <input id="reg-password" class="form-input" type="password" placeholder="Password" aria-label="Password">
                     </div>
                 </div>
                 <div class="form-group">
                     <div class="input-wrap">
-                        <span class="input-icon">📱</span>
-                        <input id="reg-phone" class="form-input" type="tel" placeholder="08xxxxxxxxxx">
+                        <span class="input-icon" aria-hidden="true">📱</span>
+                        <input id="reg-phone" class="form-input" type="tel" placeholder="08xxxxxxxxxx" aria-label="Nomor Telepon">
                     </div>
                 </div>
                 <div id="reg-error" class="form-error">Mohon isi semua field.</div>
@@ -97,9 +97,31 @@
             <div class="sidebar-profile">
                 <div class="sidebar-avatar" id="sidebar-avatar">U</div>
                 <div class="sidebar-username" id="sidebar-username">NganuNganuan</div>
+                <div class="sidebar-role" id="sidebar-role"></div>
             </div>
             <nav class="sidebar-nav">
-                <div class="nav-item active" id="nav-dashboard" onclick="navigate('dashboard')">
+                <!-- Admin-only menu items -->
+                <div class="sidebar-section-label admin-only">Admin Panel</div>
+                <div class="nav-item admin-only active" id="nav-admin-dashboard" onclick="navigate('admin-dashboard')">
+                    <i class="fas fa-chart-bar nav-icon-fa"></i>Dashboard
+                </div>
+                <div class="nav-item admin-only" id="nav-data-produk" onclick="navigate('data-produk')">
+                    <i class="fas fa-utensils nav-icon-fa"></i>Data Produk
+                </div>
+                <div class="nav-item admin-only" id="nav-data-umkm" onclick="navigate('data-umkm')">
+                    <i class="fas fa-store nav-icon-fa"></i>Data UMKM
+                </div>
+                <div class="nav-item admin-only" id="nav-data-mitra" onclick="navigate('data-mitra')">
+                    <i class="fas fa-handshake nav-icon-fa"></i>Data Mitra
+                </div>
+                <div class="nav-item admin-only" id="nav-import" onclick="navigate('import')">
+                    <i class="fas fa-file-import nav-icon-fa"></i>Bulk Import
+                </div>
+
+                <div class="sidebar-section-label admin-only" style="margin-top:0.5rem">Toko & Belanja</div>
+
+                <!-- Shared menu items -->
+                <div class="nav-item" id="nav-dashboard" onclick="navigate('dashboard')">
                     <i class="fas fa-home nav-icon-fa"></i>Dashboard
                 </div>
                 <div class="nav-item" id="nav-mitra" onclick="navigate('mitra')">
@@ -110,9 +132,6 @@
                 </div>
                 <div class="nav-item" id="nav-compare" onclick="navigate('compare')">
                     <i class="fas fa-search-dollar nav-icon-fa"></i>Bandingkan Harga
-                </div>
-                <div class="nav-item" id="nav-import" onclick="navigate('import')">
-                    <i class="fas fa-file-import nav-icon-fa"></i>Bulk Import
                 </div>
                 <div class="nav-item" id="nav-cart" onclick="navigate('cart')">
                     <i class="fas fa-shopping-cart nav-icon-fa"></i>Keranjang
@@ -141,6 +160,145 @@
 
         <!-- main nya -->
         <main class="main-content">
+
+            <!-- ADMIN DASHBOARD (admin only) -->
+            <div id="view-admin-dashboard" class="view">
+                <h2 class="section-title">📊 Statistik Dashboard</h2>
+                <div class="stats-cards" id="stats-cards">
+                    <div class="stat-card stat-card-produk">
+                        <div class="stat-icon">🍽️</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Produk</div>
+                            <div class="stat-value" id="stat-produk">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-card-umkm">
+                        <div class="stat-icon">🏪</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total UMKM</div>
+                            <div class="stat-value" id="stat-umkm">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-card-mitra">
+                        <div class="stat-icon">🤝</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Mitra</div>
+                            <div class="stat-value" id="stat-mitra">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card stat-card-orders">
+                        <div class="stat-icon">📦</div>
+                        <div class="stat-info">
+                            <div class="stat-label">Total Pesanan</div>
+                            <div class="stat-value" id="stat-orders">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-chart-container">
+                    <h3 class="admin-chart-title">Jumlah Produk per UMKM (Top 10)</h3>
+                    <div class="admin-chart" id="admin-chart"></div>
+                </div>
+
+                <div class="admin-chart-container" style="margin-top:1.5rem;">
+                    <h3 class="admin-chart-title">Produk per Jenis</h3>
+                    <div class="admin-jenis-chart" id="admin-jenis-chart"></div>
+                </div>
+            </div>
+
+            <!-- DATA PRODUK TABLE (admin only) -->
+            <div id="view-data-produk" class="view">
+                <div class="dt-header">
+                    <h2 class="section-title">Table Produk</h2>
+                    <button class="crud-add-btn" onclick="openFoodModal()">
+                        <i class="fas fa-plus"></i> Tambah Data
+                    </button>
+                </div>
+                <div class="dt-controls">
+                    <div class="dt-per-page">
+                        <select id="dt-produk-perpage" onchange="dtChangePerPage('produk')">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        <span>entries per page</span>
+                    </div>
+                    <div class="dt-search">
+                        <span>Search:</span>
+                        <input type="text" id="dt-produk-search" oninput="dtSearch('produk')" placeholder="Cari...">
+                    </div>
+                </div>
+                <div class="dt-table-wrap">
+                    <table class="dt-table" id="dt-table-produk">
+                        <thead><tr></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="dt-footer" id="dt-footer-produk"></div>
+            </div>
+
+            <!-- DATA UMKM TABLE (admin only) -->
+            <div id="view-data-umkm" class="view">
+                <div class="dt-header">
+                    <h2 class="section-title">Table UMKM</h2>
+                    <button class="crud-add-btn" onclick="openStoreModal()">
+                        <i class="fas fa-plus"></i> Tambah Data
+                    </button>
+                </div>
+                <div class="dt-controls">
+                    <div class="dt-per-page">
+                        <select id="dt-umkm-perpage" onchange="dtChangePerPage('umkm')">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        <span>entries per page</span>
+                    </div>
+                    <div class="dt-search">
+                        <span>Search:</span>
+                        <input type="text" id="dt-umkm-search" oninput="dtSearch('umkm')" placeholder="Cari...">
+                    </div>
+                </div>
+                <div class="dt-table-wrap">
+                    <table class="dt-table" id="dt-table-umkm">
+                        <thead><tr></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="dt-footer" id="dt-footer-umkm"></div>
+            </div>
+
+            <!-- DATA MITRA TABLE (admin only) -->
+            <div id="view-data-mitra" class="view">
+                <div class="dt-header">
+                    <h2 class="section-title">Table Mitra</h2>
+                    <button class="crud-add-btn" onclick="openMitraModal()">
+                        <i class="fas fa-plus"></i> Tambah Data
+                    </button>
+                </div>
+                <div class="dt-controls">
+                    <div class="dt-per-page">
+                        <select id="dt-mitra-perpage" onchange="dtChangePerPage('mitra')">
+                            <option value="10">10</option>
+                            <option value="25">25</option>
+                            <option value="50">50</option>
+                        </select>
+                        <span>entries per page</span>
+                    </div>
+                    <div class="dt-search">
+                        <span>Search:</span>
+                        <input type="text" id="dt-mitra-search" oninput="dtSearch('mitra')" placeholder="Cari...">
+                    </div>
+                </div>
+                <div class="dt-table-wrap">
+                    <table class="dt-table" id="dt-table-mitra">
+                        <thead><tr></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <div class="dt-footer" id="dt-footer-mitra"></div>
+            </div>
+
 
             <!-- DASHBOARD -->
             <div id="view-dashboard" class="view active">
@@ -192,15 +350,25 @@
 
             <!-- CATALOG -->
             <div id="view-catalog" class="view">
-                <button class="back-btn" onclick="goBack()">&#8592; Kembali</button>
+                <button class="back-btn" aria-label="Kembali" onclick="goBack()">&#8592; Kembali</button>
                 <div class="section-header">
                     <div>
                         <div class="catalog-store-title" id="catalog-store-title">Nama Toko</div>
                         <div class="catalog-store-sub" id="catalog-store-sub">Info toko</div>
                     </div>
-                    <button class="crud-add-btn" id="btn-add-food" onclick="openFoodModal()">
-                        <i class="fas fa-plus"></i> Tambah Menu
+                    <button class="crud-add-btn" id="btn-add-food" aria-label="Tambah Menu" onclick="openFoodModal()">
+                        <i class="fas fa-plus" aria-hidden="true"></i> Tambah Menu
                     </button>
+                </div>
+                <div class="compare-chips" id="catalog-filter-chips">
+                    <button class="compare-chip active" aria-pressed="true" onclick="filterCatalog('All')">Semua</button>
+                    <button class="compare-chip" aria-pressed="false" onclick="filterCatalog('Makanan')">Makanan</button>
+                    <button class="compare-chip" aria-pressed="false" onclick="filterCatalog('Minuman')">Minuman</button>
+                    <button class="compare-chip" aria-pressed="false" onclick="filterCatalog('Topping')">Topping</button>
+                </div>
+                <div id="catalog-empty" class="empty-state" style="display:none;">
+                    <div class="empty-icon">🍽️</div>
+                    <div>Belum ada menu di kategori ini.</div>
                 </div>
                 <div class="food-grid" id="food-grid"></div>
             </div>

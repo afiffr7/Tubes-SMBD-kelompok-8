@@ -1,4 +1,4 @@
-﻿        *,
+        *,
         *::before,
         *::after {
             box-sizing: border-box;
@@ -1335,11 +1335,36 @@
             display: flex !important;
         }
 
-        /* Price Comparison Styles */
+        /* Empty States */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem 1rem;
+            color: #7a6a5e;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.4);
+            border: 2px dashed var(--brown-mid);
+            border-radius: 0.85rem;
+            margin-top: 1rem;
+        }
+
+        .empty-state .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .store-search-wrap {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
         .compare-search-wrap {
             position: relative;
             margin-bottom: 1rem;
         }
+        
         .compare-search-input {
             width: 100%;
             padding: 1rem 1rem 1rem 3.25rem;
@@ -1380,6 +1405,9 @@
             color: var(--brown);
             cursor: pointer;
             transition: all 0.15s;
+            min-height: 44px; /* Touch target size */
+            display: inline-flex;
+            align-items: center;
         }
         .compare-chip:hover, .compare-chip.active {
             background: var(--brown);
@@ -1657,4 +1685,411 @@
 }
 .floating-cart-bar.hidden {
     display: none !important;
+}
+
+/* ===== ROLE-BASED VISIBILITY ===== */
+.role-user .admin-only {
+    display: none !important;
+}
+.role-user .card-actions {
+    display: none !important;
+}
+.role-user .crud-add-btn {
+    display: none !important;
+}
+
+/* ===== SIDEBAR SECTION LABEL ===== */
+.sidebar-section-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--brown-mid);
+    padding: 0.75rem 1rem 0.25rem;
+    opacity: 0.7;
+}
+
+.sidebar-role {
+    font-size: 0.65rem;
+    padding: 2px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 4px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+.role-admin .sidebar-role {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: #fff;
+}
+.role-user .sidebar-role {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: #fff;
+}
+
+/* ===== STATS CARDS ===== */
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    color: #fff;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+.stat-icon {
+    font-size: 2.2rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.stat-card-produk .stat-icon { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+.stat-card-umkm .stat-icon { background: linear-gradient(135deg, #3498db, #2980b9); }
+.stat-card-mitra .stat-icon { background: linear-gradient(135deg, #e67e22, #d35400); }
+.stat-card-orders .stat-icon { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+
+.stat-label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    margin-bottom: 2px;
+}
+
+.stat-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+/* ===== ADMIN CHART ===== */
+.admin-chart-container {
+    background: #1a1a2e;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+.admin-chart-title {
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 1.25rem;
+}
+
+.admin-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 220px;
+    padding-bottom: 30px;
+    position: relative;
+}
+
+.chart-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+    position: relative;
+}
+
+.chart-bar {
+    width: 100%;
+    max-width: 50px;
+    background: linear-gradient(180deg, #3498db, #2980b9);
+    border-radius: 6px 6px 0 0;
+    min-height: 4px;
+    transition: height 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+}
+
+.chart-bar:hover {
+    background: linear-gradient(180deg, #5dade2, #3498db);
+}
+
+.chart-bar-value {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    color: #fff;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.chart-bar-label {
+    font-size: 0.55rem;
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    margin-top: 6px;
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    position: absolute;
+    bottom: -24px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+/* Jenis chart (horizontal) */
+.admin-jenis-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.jenis-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+.jenis-bar-label {
+    width: 80px;
+    font-size: 0.8rem;
+    color: rgba(255,255,255,0.85);
+    text-align: right;
+    font-weight: 500;
+}
+.jenis-bar-track {
+    flex: 1;
+    height: 28px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+.jenis-bar-fill {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+}
+.jenis-bar-fill.makanan { background: linear-gradient(90deg, #81c784, #4caf50); }
+.jenis-bar-fill.minuman { background: linear-gradient(90deg, #4fc3f7, #0288d1); }
+.jenis-bar-fill.topping { background: linear-gradient(90deg, #ffb74d, #f57c00); }
+
+/* ===== DATA TABLE ===== */
+.dt-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.dt-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.dt-per-page {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--brown);
+}
+
+.dt-per-page select {
+    padding: 0.35rem 0.5rem;
+    border: 1px solid var(--brown-mid);
+    border-radius: 6px;
+    background: var(--sidebar-bg);
+    color: var(--brown);
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.dt-search {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--brown);
+}
+
+.dt-search input {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--brown-mid);
+    border-radius: 6px;
+    background: var(--sidebar-bg);
+    color: var(--brown);
+    font-size: 0.85rem;
+    width: 180px;
+}
+.dt-search input:focus {
+    outline: none;
+    border-color: var(--brown);
+    box-shadow: 0 0 0 2px rgba(92,78,64,0.15);
+}
+
+.dt-table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+
+.dt-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    font-size: 0.85rem;
+}
+
+.dt-table thead {
+    background: #16213e;
+}
+
+.dt-table th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    position: relative;
+    border-bottom: 2px solid rgba(255,255,255,0.1);
+    transition: background 0.2s;
+}
+.dt-table th:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.dt-table th .sort-icon {
+    margin-left: 6px;
+    font-size: 0.7rem;
+    opacity: 0.5;
+}
+.dt-table th.sort-active .sort-icon {
+    opacity: 1;
+    color: #3498db;
+}
+
+.dt-table td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.dt-table tbody tr {
+    transition: background 0.15s;
+}
+.dt-table tbody tr:hover {
+    background: rgba(255,255,255,0.04);
+}
+
+.dt-table tbody tr:nth-child(even) {
+    background: rgba(255,255,255,0.02);
+}
+.dt-table tbody tr:nth-child(even):hover {
+    background: rgba(255,255,255,0.06);
+}
+
+.dt-action-btn {
+    padding: 0.3rem 0.75rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-right: 4px;
+}
+.dt-action-btn:hover {
+    opacity: 0.85;
+    transform: scale(1.05);
+}
+
+.dt-btn-edit {
+    background: linear-gradient(135deg, #f0ad4e, #ec971f);
+    color: #fff;
+}
+.dt-btn-delete {
+    background: linear-gradient(135deg, #d9534f, #c9302c);
+    color: #fff;
+}
+
+/* Data table footer / pagination */
+.dt-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: var(--brown);
+}
+
+.dt-info {
+    opacity: 0.8;
+}
+
+.dt-pagination {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dt-page-btn {
+    padding: 0.35rem 0.65rem;
+    border: 1px solid var(--brown-mid);
+    border-radius: 6px;
+    background: var(--sidebar-bg);
+    color: var(--brown);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 32px;
+    text-align: center;
+}
+.dt-page-btn:hover {
+    background: var(--brown);
+    color: #fff;
+}
+.dt-page-btn.active {
+    background: #3498db;
+    color: #fff;
+    border-color: #3498db;
+    font-weight: 700;
+}
+.dt-page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.dt-page-ellipsis {
+    padding: 0.35rem 0.4rem;
+    color: var(--brown-mid);
 }

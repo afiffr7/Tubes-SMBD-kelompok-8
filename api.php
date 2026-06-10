@@ -510,4 +510,122 @@ if ($action == 'get_orders') {
     }
     echo json_encode(['success' => true, 'orders' => $orders]);
 }
+
+// ===== ADMIN STATS =====
+
+if ($action == 'get_stats') {
+    requireAdmin();
+
+    $total_produk = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM produk"))['c'];
+    $total_umkm = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM umkm"))['c'];
+    $total_mitra = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM mitra"))['c'];
+    $total_orders = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM orders"))['c'];
+    $total_users = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM users"))['c'];
+
+    // Produk per UMKM (top 10 untuk chart)
+    $chart_raw = mysqli_fetch_all(mysqli_query($conn, "
+        SELECT u.nama_umkm, COUNT(p.id_produk) as jumlah
+        FROM umkm u
+        LEFT JOIN produk p ON u.id_umkm = p.id_umkm
+        GROUP BY u.id_umkm
+        ORDER BY jumlah DESC
+        LIMIT 10
+    "), MYSQLI_ASSOC);
+
+    // Produk per jenis
+    $jenis_raw = mysqli_fetch_all(mysqli_query($conn, "
+        SELECT j.nama_jenis, COUNT(p.id_produk) as jumlah
+        FROM jenis j
+        LEFT JOIN produk p ON j.id_jenis = p.id_jenis
+        GROUP BY j.id_jenis
+    "), MYSQLI_ASSOC);
+
+    echo json_encode([
+        'success' => true,
+        'stats' => [
+            'total_produk' => (int)$total_produk,
+            'total_umkm' => (int)$total_umkm,
+            'total_mitra' => (int)$total_mitra,
+            'total_orders' => (int)$total_orders,
+            'total_users' => (int)$total_users,
+        ],
+        'chart_produk_per_umkm' => $chart_raw,
+        'chart_produk_per_jenis' => $jenis_raw,
+    ]);
+}
+
+// ===== ADMIN DATA TABLE =====
+
+if ($action == 'get_table_data') {
+    requireAdmin();
+
+    $table = $_GET['table'] ?? '';
+    $page = max(1, (int)($_GET['page'] ?? 1));
+    $perPage = max(5, min(100, (int)($_GET['per_page'] ?? 10)));
+    $search = mysqli_real_escape_string($conn, $_GET['search'] ?? '');
+    $sortCol = $_GET['sort'] ?? '';
+    $sortDir = strtoupper($_GET['dir'] ?? 'ASC') === 'DESC' ? 'DESC' : 'ASC';
+
+    $offset = ($page - 1) * $perPage;
+    $rows = [];
+    $total = 0;
+    $columns = [];
+
+    if ($table === 'produk') {
+        $columns = ['id_produk', 'nama_produk', 'harga', 'nama_jenis', 'nama_umkm'];
+        $where = $search ? "WHERE p.nama_produk LIKE '%$search%' OR j.nama_jenis LIKE '%$search%' OR u.nama_umkm LIKE '%$search%'" : "";
+
+        $allowedSort = ['id_produk'=>'p.id_produk', 'nama_produk'=>'p.nama_produk', 'harga'=>'p.harga', 'nama_jenis'=>'j.nama_jenis', 'nama_umkm'=>'u.nama_umkm'];
+        $orderBy = isset($allowedSort[$sortCol]) ? "ORDER BY {$allowedSort[$sortCol]} $sortDir" : "ORDER BY p.id_produk ASC";
+
+        $total = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM produk p LEFT JOIN jenis j ON p.id_jenis=j.id_jenis LEFT JOIN umkm u ON p.id_umkm=u.id_umkm $where"))['c'];
+        $rows = mysqli_fetch_all(mysqli_query($conn, "
+            SELECT p.id_produk, p.nama_produk, p.harga, j.nama_jenis, u.nama_umkm, p.id_umkm
+            FROM produk p
+            LEFT JOIN jenis j ON p.id_jenis = j.id_jenis
+            LEFT JOIN umkm u ON p.id_umkm = u.id_umkm
+            $where $orderBy LIMIT $perPage OFFSET $offset
+        "), MYSQLI_ASSOC);
+
+    } else if ($table === 'umkm') {
+        $columns = ['id_umkm', 'nama_umkm', 'alamat', 'kontak_umkm', 'sertifikasi_halal'];
+        $where = $search ? "WHERE nama_umkm LIKE '%$search%' OR alamat LIKE '%$search%'" : "";
+
+        $allowedSort = ['id_umkm'=>'id_umkm', 'nama_umkm'=>'nama_umkm', 'alamat'=>'alamat', 'kontak_umkm'=>'kontak_umkm'];
+        $orderBy = isset($allowedSort[$sortCol]) ? "ORDER BY {$allowedSort[$sortCol]} $sortDir" : "ORDER BY id_umkm ASC";
+
+        $total = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM umkm $where"))['c'];
+        $rows = mysqli_fetch_all(mysqli_query($conn, "SELECT id_umkm, nama_umkm, alamat, kontak_umkm, sertifikasi_halal FROM umkm $where $orderBy LIMIT $perPage OFFSET $offset"), MYSQLI_ASSOC);
+
+    } else if ($table === 'mitra') {
+        $columns = ['id_mitra', 'nama_mitra', 'jumlah_umkm'];
+        $where = $search ? "HAVING nama_mitra LIKE '%$search%'" : "";
+
+        $allowedSort = ['id_mitra'=>'m.id_mitra', 'nama_mitra'=>'m.nama_mitra', 'jumlah_umkm'=>'jumlah_umkm'];
+        $orderBy = isset($allowedSort[$sortCol]) ? "ORDER BY {$allowedSort[$sortCol]} $sortDir" : "ORDER BY m.id_mitra ASC";
+
+        $total = mysqli_fetch_assoc(mysqli_query($conn, "SELECT COUNT(*) as c FROM mitra"))['c'];
+        $rows = mysqli_fetch_all(mysqli_query($conn, "
+            SELECT m.id_mitra, m.nama_mitra, COUNT(mu.id_umkm) as jumlah_umkm
+            FROM mitra m
+            LEFT JOIN mitra_umkm mu ON m.id_mitra = mu.id_mitra
+            GROUP BY m.id_mitra
+            $where $orderBy LIMIT $perPage OFFSET $offset
+        "), MYSQLI_ASSOC);
+
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Tabel tidak valid.']);
+        exit;
+    }
+
+    echo json_encode([
+        'success' => true,
+        'rows' => $rows,
+        'total' => (int)$total,
+        'page' => $page,
+        'per_page' => $perPage,
+        'total_pages' => ceil($total / $perPage),
+        'columns' => $columns,
+    ]);
+}
 ?>
