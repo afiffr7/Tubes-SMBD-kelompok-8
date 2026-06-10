@@ -686,6 +686,7 @@ function parseBulkImportText() {
             parts = line.split(',');
         }
 
+
         // Jika masih kurang, coba split by spasi ganda (multiple spaces)
         if (parts.length < 3) {
             parts = line.split(/\s{2,}/);
@@ -896,7 +897,7 @@ let currentCatalogCategory = 'All';
 
 function filterCatalog(category) {
     currentCatalogCategory = category;
-    
+
     // Update active chip
     const chips = document.querySelectorAll('#catalog-filter-chips .compare-chip');
     chips.forEach(chip => {
@@ -916,12 +917,12 @@ function renderCatalog(storeId, category = currentCatalogCategory) {
     if (storeId) currentStoreId = storeId;
     const store = stores.find(s => s.id === currentStoreId);
     if (!store) return;
-    
+
     document.getElementById('catalog-store-title').textContent = store.name;
     document.getElementById('catalog-store-sub').textContent = store.info;
-    
+
     let storeFoods = foods[currentStoreId] || [];
-    
+
     if (category !== 'All') {
         storeFoods = storeFoods.filter(f => f.jenis === category);
     }
@@ -1170,7 +1171,7 @@ function renderDataTable(tableName, data) {
 
     const thead = tableEl.querySelector('thead tr');
     const tbody = tableEl.querySelector('tbody');
-    
+
     // Mapping columns to readable names
     const colLabels = {
         id_produk: 'ID',
@@ -1194,7 +1195,7 @@ function renderDataTable(tableName, data) {
         const isSorted = state.sort === col;
         const sortClass = isSorted ? 'sort-active' : '';
         const sortIcon = isSorted ? (state.sortDir === 'ASC' ? '<i class="fas fa-sort-up"></i>' : '<i class="fas fa-sort-down"></i>') : '<i class="fas fa-sort"></i>';
-        
+
         return `<th class="${sortClass}" onclick="dtSort('${tableName}', '${col}')">${label} <span class="sort-icon">${sortIcon}</span></th>`;
     }).join('') + `<th>Aksi</th>`;
 
@@ -1247,36 +1248,36 @@ function renderDataTable(tableName, data) {
     if (footerEl) {
         const fromVal = data.total === 0 ? 0 : (data.page - 1) * data.per_page + 1;
         const toVal = Math.min(data.page * data.per_page, data.total);
-        
+
         // Render pagination buttons
         let pagHtml = '';
-        
+
         // Prev button
         pagHtml += `<button class="dt-page-btn" ${data.page === 1 ? 'disabled' : ''} onclick="dtGoToPage('${tableName}', ${data.page - 1})">Sebelumnya</button>`;
-        
+
         // Simple page numbers with ellipsis
         const maxVisible = 5;
         let startPage = Math.max(1, data.page - 2);
         let endPage = Math.min(data.total_pages, startPage + maxVisible - 1);
-        
+
         if (endPage - startPage + 1 < maxVisible) {
             startPage = Math.max(1, endPage - maxVisible + 1);
         }
-        
+
         if (startPage > 1) {
             pagHtml += `<button class="dt-page-btn" onclick="dtGoToPage('${tableName}', 1)">1</button>`;
             if (startPage > 2) pagHtml += `<span class="dt-page-ellipsis">...</span>`;
         }
-        
+
         for (let p = startPage; p <= endPage; p++) {
             pagHtml += `<button class="dt-page-btn ${p === data.page ? 'active' : ''}" onclick="dtGoToPage('${tableName}', ${p})">${p}</button>`;
         }
-        
+
         if (endPage < data.total_pages) {
             if (endPage < data.total_pages - 1) pagHtml += `<span class="dt-page-ellipsis">...</span>`;
             pagHtml += `<button class="dt-page-btn" onclick="dtGoToPage('${tableName}', ${data.total_pages})">${data.total_pages}</button>`;
         }
-        
+
         // Next button
         pagHtml += `<button class="dt-page-btn" ${data.page === data.total_pages || data.total_pages === 0 ? 'disabled' : ''} onclick="dtGoToPage('${tableName}', ${data.page + 1})">Selanjutnya</button>`;
 

@@ -18,7 +18,6 @@ mysqli_set_charset($conn_setup, "utf8mb4");
 
 // Buat database
 mysqli_query($conn_setup, "CREATE DATABASE IF NOT EXISTS `$db` CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci");
-
 // Pilih database
 mysqli_select_db($conn_setup, $db);
 
