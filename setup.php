@@ -45,6 +45,7 @@ mysqli_query($conn_setup, "CREATE TABLE IF NOT EXISTS `users` (
     UNIQUE KEY `username` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 
+
 // Buat tabel orders jika belum ada
 mysqli_query($conn_setup, "CREATE TABLE IF NOT EXISTS `orders` (
     `id` int(11) NOT NULL AUTO_INCREMENT,

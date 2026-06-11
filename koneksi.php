@@ -17,6 +17,5 @@ if (!$conn_check) {
 } else {
     $conn = $conn_check;
 }
-
 mysqli_set_charset($conn, "utf8mb4");
 ?>

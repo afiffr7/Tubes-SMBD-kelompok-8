@@ -701,6 +701,7 @@ Winmilk	Smoothies	12000	Cheesecake</pre>
         let mitras = <?php echo json_encode($mitras); ?>;
         let stores = <?php echo json_encode($stores); ?>.map(s => ({ ...s, id: parseInt(s.id) }));
         let foods = <?php echo json_encode($foods); ?>;
+        
         window.promoProducts = <?php echo json_encode($promos); ?>;
         Object.keys(foods).forEach(k => {
             foods[k] = foods[k].map(f => ({ ...f, id: parseInt(f.id), price: parseInt(f.price) }));

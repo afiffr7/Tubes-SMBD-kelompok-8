@@ -332,6 +332,7 @@ INNER JOIN mitra m ON mu.id_mitra = m.id_mitra
 WHERE u.id_umkm = ?;
 ```
 
+
 #### Fitur Pencarian Dinamis dengan Pencocokan Teks & Rentang Harga
 Query filter pencarian produk berdasarkan kemiripan nama makanan/nama toko, rentang harga, dan filter jenis kategori secara bersamaan.
 ```sql

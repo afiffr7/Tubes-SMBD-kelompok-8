@@ -825,7 +825,6 @@ function startPromoSlider() {
     if (promoInterval) clearInterval(promoInterval);
     promoIndex = 0;
     updateSliderPos();
-
     promoInterval = setInterval(() => {
         promoIndex = (promoIndex + 1) % promoProducts.length;
         updateSliderPos();

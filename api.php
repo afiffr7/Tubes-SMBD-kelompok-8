@@ -616,6 +616,7 @@ if ($action == 'get_table_data') {
 
     } else {
         echo json_encode(['success' => false, 'message' => 'Tabel tidak valid.']);
+        
         exit;
     }
 
