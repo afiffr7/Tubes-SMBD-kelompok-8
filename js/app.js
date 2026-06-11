@@ -1,9 +1,4 @@
-const promoProducts = [
-    { storeId: 1, foodId: 101, name: 'Nasi Rendang', oldPrice: 30000, newPrice: 20000, icon: '🍔', label: 'SUPER DISKON' },
-    { storeId: 2, foodId: 201, name: 'Beef Burger', oldPrice: 40000, newPrice: 25000, icon: '🍔', label: 'PROMO KILAT' },
-    { storeId: 4, foodId: 401, name: 'Pepperoni Pizza', oldPrice: 75000, newPrice: 50000, icon: '🍕', label: 'BEST SELLER' },
-    { storeId: 6, foodId: 602, name: 'Mie Ayam', oldPrice: 22000, newPrice: 15000, icon: '🍜', label: 'MURAH BANGET' },
-];
+let promoProducts = window.promoProducts || [];
 
 let cart = [];
 let currentView = 'dashboard';

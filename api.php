@@ -149,7 +149,7 @@ if ($action == 'get_data') {
     ]);
 }
 
-// ===== CRUD STORES (Admin Only) - mapped to umkm =====
+// ===== CRUD STORES (Admin Only) - buat umkm =====
 
 if ($action == 'add_store') {
     requireAdmin();
@@ -222,7 +222,7 @@ if ($action == 'delete_store') {
     }
 }
 
-// ===== CRUD FOODS (Admin Only) - mapped to produk =====
+// ===== CRUD FOODS (Admin doanf) - buat produk =====
 
 if ($action == 'add_food') {
     requireAdmin();
@@ -300,7 +300,7 @@ if ($action == 'delete_food') {
     }
 }
 
-// ===== CRUD MITRAS (Admin Only) - mapped to mitra =====
+// ===== CRUD (Admin doang) - buat mitra =====
 
 if ($action == 'add_mitra') {
     requireAdmin();
@@ -434,7 +434,7 @@ if ($action == 'bulk_add_foods') {
     }
 }
 
-// ===== ORDERS =====
+// ===== ORDERRRRRRRRRRRR =====
 
 if ($action == 'checkout') {
     requireLogin();
@@ -555,7 +555,7 @@ if ($action == 'get_stats') {
     ]);
 }
 
-// ===== ADMIN DATA TABLE =====
+// ===== ADMIN tabel  =====
 
 if ($action == 'get_table_data') {
     requireAdmin();

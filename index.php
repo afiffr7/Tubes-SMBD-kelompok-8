@@ -19,10 +19,10 @@
     <div id="home-page">
 
         <div class="home-form-area">
-            <!-- Dynamic title -->
+            <!-- title -->
             <div class="home-title" id="home-title">Login</div>
 
-            <!-- Tabs -->
+            <!-- Tab -->
             <div class="auth-tabs">
                 <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Login</button>
                 <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Register</button>
@@ -101,7 +101,7 @@
                 <div class="sidebar-role" id="sidebar-role"></div>
             </div>
             <nav class="sidebar-nav">
-                <!-- Admin-only menu items -->
+                <!-- admin panel -->
                 <div class="sidebar-section-label admin-only">Admin Panel</div>
                 <div class="nav-item admin-only active" id="nav-admin-dashboard" onclick="navigate('admin-dashboard')">
                     <i class="fas fa-chart-bar nav-icon-fa"></i>Dashboard
@@ -121,7 +121,7 @@
 
                 <div class="sidebar-section-label admin-only" style="margin-top:0.5rem">Toko & Belanja</div>
 
-                <!-- Shared menu items -->
+                <!-- menu -->
                 <div class="nav-item" id="nav-dashboard" onclick="navigate('dashboard')">
                     <i class="fas fa-home nav-icon-fa"></i>Dashboard
                 </div>
@@ -147,7 +147,7 @@
             </div>
         </aside>
 
-        <!-- running billboard -->
+        <!-- billboard -->
         <header class="billboard">
             <div class="billboard-track">
                 <span class="billboard-text">Hai sahabat! &nbsp;&nbsp;✦&nbsp;&nbsp; Gaji itu ibarat mantan, cuma lewat
@@ -162,7 +162,7 @@
         <!-- main nya -->
         <main class="main-content">
 
-            <!-- ADMIN DASHBOARD (admin only) -->
+            <!-- ADMIN DASHBOARD (admin doang btw) -->
             <div id="view-admin-dashboard" class="view">
                 <h2 class="section-title">📊 Statistik Dashboard</h2>
                 <div class="stats-cards" id="stats-cards">
@@ -207,7 +207,7 @@
                 </div>
             </div>
 
-            <!-- DATA PRODUK TABLE (admin only) -->
+            <!-- DATA PRODUK TABLE (admin lagi) -->
             <div id="view-data-produk" class="view">
                 <div class="dt-header">
                     <h2 class="section-title">Table Produk</h2>
@@ -238,7 +238,7 @@
                 <div class="dt-footer" id="dt-footer-produk"></div>
             </div>
 
-            <!-- DATA UMKM TABLE (admin only) -->
+            <!-- DATA UMKM TABLE (admin) -->
             <div id="view-data-umkm" class="view">
                 <div class="dt-header">
                     <h2 class="section-title">Table UMKM</h2>
@@ -269,7 +269,7 @@
                 <div class="dt-footer" id="dt-footer-umkm"></div>
             </div>
 
-            <!-- DATA MITRA TABLE (admin only) -->
+            <!-- DATA MITRA TABLE (admin) -->
             <div id="view-data-mitra" class="view">
                 <div class="dt-header">
                     <h2 class="section-title">Table Mitra</h2>
@@ -374,7 +374,7 @@
                 <div class="food-grid" id="food-grid"></div>
             </div>
 
-            <!-- CART -->
+            <!-- keranjang makanan -->
             <div id="view-cart" class="view">
                 <h2 class="section-title">Keranjang</h2>
                 <div id="cart-empty" style="text-align:center;padding:3rem 0;color:#999;display:none;">
@@ -393,26 +393,50 @@
                 </div>
             </div>
 
-            <!-- ORDERS -->
+            <!-- riwayat pesanan -->
             <div id="view-orders" class="view">
                 <h2 class="section-title">Riwayat Pesanan</h2>
                 <div id="orders-list"></div>
             </div>
 
-            <!-- COMPARE PRICE -->
+            <!-- COMPARE HARGAAAAA -->
             <div id="view-compare" class="view">
                 <h2 class="section-title">Bandingkan Harga Makanan</h2>
                 <div class="compare-search-wrap">
                     <i class="fas fa-search compare-search-icon"></i>
-                    <input type="text" class="compare-search-input" id="compare-search" placeholder="Cari makanan (misal: nasi, burger, sushi)..." oninput="onCompareSearchInput()">
+                    <input type="text" class="compare-search-input" id="compare-search" placeholder="Cari makanan (misal: nasi, bakso, sate, mie)..." oninput="onCompareSearchInput()">
                 </div>
                 <div class="compare-chips">
-                    <span class="compare-chip" onclick="searchCompareChip('Nasi')">🍚 Nasi</span>
-                    <span class="compare-chip" onclick="searchCompareChip('Burger')">🍔 Burger</span>
-                    <span class="compare-chip" onclick="searchCompareChip('Sushi')">🍣 Sushi</span>
-                    <span class="compare-chip" onclick="searchCompareChip('Pizza')">🍕 Pizza</span>
-                    <span class="compare-chip" onclick="searchCompareChip('Bakso')">🍜 Bakso</span>
-                    <span class="compare-chip" onclick="searchCompareChip('Kopi')">☕ Kopi</span>
+                    <?php
+                    $common_keywords = ['Nasi', 'Bakso', 'Mie', 'Sate', 'Martabak', 'Kebab', 'Cireng', 'Kopi', 'Teh', 'Es', 'Cilor', 'Ketoprak', 'Soto', 'Lontong', 'Bola Ubi'];
+                    $emoji_map = [
+                        'Nasi' => '🍚',
+                        'Bakso' => '🍜',
+                        'Mie' => '🍝',
+                        'Sate' => '🍢',
+                        'Martabak' => '🥞',
+                        'Kebab' => '🌯',
+                        'Cireng' => '🍘',
+                        'Kopi' => '☕',
+                        'Teh' => '🍵',
+                        'Es' => '🍨',
+                        'Cilor' => '🍢',
+                        'Ketoprak' => '🍲',
+                        'Soto' => '🥣',
+                        'Lontong' => '🍛',
+                        'Bola Ubi' => '🍠'
+                    ];
+                    foreach ($common_keywords as $keyword) {
+                        $q = mysqli_query($conn, "SELECT COUNT(*) as count FROM produk WHERE nama_produk LIKE '%$keyword%'");
+                        if ($q) {
+                            $row = mysqli_fetch_assoc($q);
+                            if ($row['count'] > 0) {
+                                $emoji = isset($emoji_map[$keyword]) ? $emoji_map[$keyword] : '🍽️';
+                                echo '<span class="compare-chip" onclick="searchCompareChip(\'' . $keyword . '\')">' . $emoji . ' ' . $keyword . '</span>';
+                            }
+                        }
+                    }
+                    ?>
                 </div>
                 <div id="compare-empty" style="text-align:center;padding:3rem 0;color:#7a6a5e;">
                     <div style="font-size:3rem;margin-bottom:.5rem;">🔍</div>
@@ -421,7 +445,7 @@
                 <div class="compare-results" id="compare-results" style="display:none;"></div>
             </div>
 
-            <!-- BULK IMPORT -->
+            <!-- BULK IMPORT, fitur terkeren  -->
             <div id="view-import" class="view">
                 <h2 class="section-title">Bulk Import Toko & Makanan</h2>
                 <div style="background:var(--summary-bg); border: 2px solid var(--brown); border-radius: 0.75rem; padding: 1rem; margin-bottom: 1.5rem; font-size: 0.85rem; line-height: 1.5;">
@@ -490,9 +514,9 @@ Winmilk	Smoothies	12000	Cheesecake</pre>
         </div>
     </div>
 
-    <!-- CRUD MODALS -->
+    <!-- crud -->
 
-    <!-- Modal: Tambah/Edit Toko -->
+    <!-- Tambah/Edit Toko -->
     <div id="modal-store" class="crud-modal-overlay">
         <div class="crud-modal-box">
             <div class="crud-modal-title" id="modal-store-title">Tambah Toko</div>
@@ -523,7 +547,7 @@ Winmilk	Smoothies	12000	Cheesecake</pre>
         </div>
     </div>
 
-    <!-- Modal: Tambah/Edit Makanan -->
+    <!--  Tambah/Edit Makanan -->
     <div id="modal-food" class="crud-modal-overlay">
         <div class="crud-modal-box">
             <div class="crud-modal-title" id="modal-food-title">Tambah Menu</div>
@@ -552,7 +576,7 @@ Winmilk	Smoothies	12000	Cheesecake</pre>
         </div>
     </div>
 
-    <!-- Modal: Tambah/Edit Mitra -->
+    <!-- Tambah/Edit Mitra -->
     <div id="modal-mitra" class="crud-modal-overlay">
         <div class="crud-modal-box">
             <div class="crud-modal-title" id="modal-mitra-title">Tambah Mitra</div>
@@ -574,7 +598,7 @@ Winmilk	Smoothies	12000	Cheesecake</pre>
         </div>
     </div>
 
-    <!-- Modal: Konfirmasi Hapus -->
+    <!--  Konfirmasi Hapus -->
     <div id="modal-delete" class="crud-modal-overlay">
         <div class="crud-modal-box">
             <div class="delete-icon">🗑️</div>
@@ -588,11 +612,10 @@ Winmilk	Smoothies	12000	Cheesecake</pre>
         </div>
     </div>
 
-    <!-- Toast container -->
     <div class="toast-container" id="toast-container"></div>
 
     <script>
-        /* data fetch */
+        /* narik data */
         <?php
         // Ambil mitra dari tabel baru
         $mitras_raw = mysqli_fetch_all(mysqli_query($conn, "SELECT id_mitra, nama_mitra FROM mitra"), MYSQLI_ASSOC);
@@ -636,13 +659,49 @@ Winmilk	Smoothies	12000	Cheesecake</pre>
                 'jenis' => $f['nama_jenis'] ?? 'Makanan'
             ];
         }
+
+        $promos = [];
+        $labels = ['SUPER DISKON', 'PROMO KILAT', 'BEST SELLER', 'MURAH BANGET'];
+        $emojis = ['🍔', '🍕', '🍰', '🍜', '🥤', '🍞', '🥞', '🌯', '🍚'];
+        $promo_query = mysqli_query($conn, "
+            SELECT p.id_produk, p.id_umkm, p.nama_produk, p.harga, j.nama_jenis 
+            FROM produk p 
+            LEFT JOIN jenis j ON p.id_jenis = j.id_jenis 
+            ORDER BY RAND() LIMIT 4
+        ");
+        if ($promo_query && mysqli_num_rows($promo_query) > 0) {
+            $i = 0;
+            while ($row = mysqli_fetch_assoc($promo_query)) {
+                $old_price = round((int)$row['harga'] * 1.3, -3); // Diskon ~30%
+                $icon = '🍽️';
+                if ($row['nama_jenis'] == 'Minuman') $icon = '🥤';
+                else if (stripos($row['nama_produk'], 'bakso') !== false || stripos($row['nama_produk'], 'mie') !== false) $icon = '🍜';
+                else if (stripos($row['nama_produk'], 'nasi') !== false) $icon = '🍚';
+                else if (stripos($row['nama_produk'], 'martabak') !== false) $icon = '🥞';
+                else $icon = $emojis[array_rand($emojis)];
+
+                $promos[] = [
+                    'storeId' => (int)$row['id_umkm'],
+                    'foodId' => (int)$row['id_produk'],
+                    'name' => $row['nama_produk'],
+                    'oldPrice' => $old_price,
+                    'newPrice' => (int)$row['harga'],
+                    'icon' => $icon,
+                    'label' => $labels[$i % count($labels)]
+                ];
+                $i++;
+            }
+        } else {
+            $promos = [
+                ['storeId' => 1, 'foodId' => 1, 'name' => 'Bakpao Ayam', 'oldPrice' => 10000, 'newPrice' => 7000, 'icon' => '🫓', 'label' => 'SUPER DISKON']
+            ];
+        }
         ?>
 
         let mitras = <?php echo json_encode($mitras); ?>;
         let stores = <?php echo json_encode($stores); ?>.map(s => ({ ...s, id: parseInt(s.id) }));
         let foods = <?php echo json_encode($foods); ?>;
-
-        // Normalize food prices to int
+        window.promoProducts = <?php echo json_encode($promos); ?>;
         Object.keys(foods).forEach(k => {
             foods[k] = foods[k].map(f => ({ ...f, id: parseInt(f.id), price: parseInt(f.price) }));
         });
